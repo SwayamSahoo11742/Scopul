@@ -32,7 +32,9 @@ print(scop.tempo.ratio)
 ## Link
 Documentaion - [https://swayamsahoo11742.github.io/](https://swayamsahoo11742.github.io/)
 
-PyPi - https://pypi.org/project/scopul/
+PyPi - [https://pypi.org/project/scopul/](https://pypi.org/project/scopul/)
+
+GitHub - [https://github.com/SwayamSahoo11742/Scopul/](https://github.com/SwayamSahoo11742/Scopul/)
 
 
 ## Contact or Help us!
