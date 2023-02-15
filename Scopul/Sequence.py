@@ -1,6 +1,6 @@
 from music21 import note, chord
-from scopul_exception import InvalidMusicElementError
-from conversions import note_to_number
+from Scopul.scopul_exception import InvalidMusicElementError
+from Scopul.conversions import note_to_number
 
 
 class Part:
@@ -225,7 +225,7 @@ class Part:
                 )
             # Append to list
             if type(i) == Note:
-                if highest == None:
+                if highest == 0:
                     highest = i
                 else:
                     note_val = note_to_number(i.name[0], int(i.name[1]))

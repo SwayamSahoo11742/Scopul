@@ -1,6 +1,6 @@
 from music21 import converter, environment, instrument
 import os
-from scopul_exception import InvalidFileFormatError
+from Scopul.scopul_exception import InvalidFileFormatError
 from mido import bpm2tempo, tempo2bpm, MidiFile
 
 # Setting up music21 with MuseScore
@@ -8,9 +8,9 @@ env = environment.Environment()
 env["musicxmlPath"] = r"MuseScore 4/bin/MuseScore4.exe"
 env["musescoreDirectPNGPath"] = r"MuseScore 4/bin/MuseScore4.exe"
 
-from TimeSignature import TimeSignature
-from Tempo import Tempo
-from Sequence import Part, Rest, Chord, Note
+from Scopul.TimeSignature import TimeSignature
+from Scopul.Tempo import Tempo
+from Scopul.Sequence import Part, Rest, Chord, Note
 
 
 class Scopul():
@@ -31,10 +31,14 @@ class Scopul():
 
     # Midi File (midi)
     @property
-    def midi(self):
+    def audio(self):
         """Retrieves your midi file."""
-        return self._midi
+        return self._audio
 
+    @property
+    def midi(self):
+        """Retrieves midi file"""
+        return self._midi
     @property
     def parts(self) -> list:
         """Retrieves a list of Part objects
@@ -45,8 +49,8 @@ class Scopul():
         return self._parts
 
     # Midi File setter
-    @midi.setter
-    def midi(self, audio) -> None:
+    @audio.setter
+    def audio(self, audio) -> None:
         """Allows to reconstruct the object to change accordingly to a new midi"""
         self.construct(audio)
 

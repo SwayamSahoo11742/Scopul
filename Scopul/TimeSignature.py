@@ -90,6 +90,3 @@ class TimeSignature:
 
         return sig_list
 
-    # Str method
-    def __str__(self):
-        return self.ratio
