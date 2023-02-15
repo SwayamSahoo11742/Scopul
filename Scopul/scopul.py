@@ -1,19 +1,16 @@
 from music21 import converter, environment, instrument
 import os
-from Scopul.scopul_exception import InvalidFileFormatError
+from Scopul.scopul_exception import InvalidFileFormatError, InvalidMusicElementError, NoMusePathError
 from mido import bpm2tempo, tempo2bpm, MidiFile
 
 # Setting up music21 with MuseScore
-env = environment.Environment()
-env["musicxmlPath"] = r"MuseScore 4/bin/MuseScore4.exe"
-env["musescoreDirectPNGPath"] = r"MuseScore 4/bin/MuseScore4.exe"
-
 from Scopul.TimeSignature import TimeSignature
 from Scopul.Tempo import Tempo
 from Scopul.Sequence import Part, Rest, Chord, Note
 
 
 class Scopul():
+
     def __init__(self, audio):
         self.construct(audio)
 
@@ -75,6 +72,20 @@ class Scopul():
         Raises:
             FileExistsError: if overwrite is False and there is a file at the same path
         """
+
+        # Looking for muse score path
+        try:
+            env = environment.Environment()
+            env["musicxmlPath"] = os.environ["MUSESCORE_PATH"]
+            env["musescoreDirectPNGPath"] = os.environ["MUSESCORE_PATH"]
+        except:
+            raise NoMusePathError("Path to musescore not set. please set using config_musescore()")
+        
+        # checking for existance of the path
+        if os.path.exists(os.environ["MUSESCORE_PATH"]) == False:
+            raise FileNotFoundError(f"MuseScore path at {os.environ['MUSESCORE_PATH']} not found. Please check to see if it exists")
+        
+
         # Check for correct file format
         ext = os.path.splitext(output)[1]
         if ext != ".pdf":
@@ -115,6 +126,19 @@ class Scopul():
         Raises:
             FileExistsError: if overwrite is False and there is a file at the same path
         """
+
+        # Looking for muse score path
+        try:
+            env = environment.Environment()
+            env["musicxmlPath"] = os.environ["MUSESCORE_PATH"]
+            env["musescoreDirectPNGPath"] = os.environ["MUSESCORE_PATH"]
+        except:
+            raise NoMusePathError("Path to musescore not set. please set using config_musescore()")
+        
+        # Checking for existance of the path
+        if os.path.exists(os.environ["MUSESCORE_PATH"]) == False:
+            raise FileNotFoundError(f"MuseScore path at {os.environ['MUSESCORE_PATH']} not found. Please check to see if it exists")
+
         # Check for correct file format
         ext = os.path.splitext(output)[1]
         if ext != ".xml":

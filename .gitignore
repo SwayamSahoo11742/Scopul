@@ -6,4 +6,4 @@ MuseScore 4/
 main.py
 .vs/
 env/
-.gitignore
+MANIFEST.in
