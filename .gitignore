@@ -7,3 +7,6 @@ main.py
 .vs/
 env/
 MANIFEST.in
+build/
+dist/
+scopul.egg-info/
