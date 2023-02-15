@@ -106,6 +106,7 @@ class Scopul():
                 )
 
         # Creates the pdf and deletes the musicxml file
+        self.midi.metadata.title = output.split(".")[0]
         self.midi.write("musicxml.pdf", fp=fp)
         os.rename(fp + ".musicxml.pdf", fp + output)
         os.remove(fp + ".musicxml.musicxml")
