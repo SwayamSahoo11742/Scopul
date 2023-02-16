@@ -33,7 +33,7 @@ print(scop.tempo.ratio)
 
 ```
 
-## Link
+## Links
 Documentaion - [https://swayamsahoo11742.github.io/](https://swayamsahoo11742.github.io/)
 
 Documentation Source Code - [https://github.com/SwayamSahoo11742/SwayamSahoo11742.github.io/](https://github.com/SwayamSahoo11742/SwayamSahoo11742.github.io/)
@@ -42,6 +42,8 @@ PyPi - [https://pypi.org/project/scopul/](https://pypi.org/project/scopul/)
 
 GitHub - [https://github.com/SwayamSahoo11742/Scopul/](https://github.com/SwayamSahoo11742/Scopul/)
 
+## Credits
+Thanks to [Music21](https://web.mit.edu/music21/doc/) and [MuseScore](https://musescore.org/en/download) for making this possible
 
 ## Contact or Help us!
 If you encounter any bugs, kindly send me an email at swayamsa01@gmail.com. If you have any suggestions or would like to contribute to the improvement of the code, including efficiency and best practices, feel free to reach out to me via email or create a pull request. I most likely won’t be actively adding and developing this project, but I will still implement any sugegstions that are fit.
