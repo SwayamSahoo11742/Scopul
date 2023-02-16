@@ -2,7 +2,7 @@
 
 ![PyPI - Status](https://img.shields.io/pypi/status/Scopul)
 ![PyPI](https://img.shields.io/pypi/v/scopul)
-![PyPI - License](https://img.shields.io/pypi/l/Scopul)
+
 
 `Scopul` is a python package to extract data from MIDI files!
 
