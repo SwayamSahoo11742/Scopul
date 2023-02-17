@@ -32,6 +32,11 @@ print(scop.tempo.ratio)
 >>> "3/4"
 
 ```
+## Future Plans
+- Time signature conversions
+- Tempo conversions
+- Extract a specific rhythm
+- Altering MIDI (adding/Deleting measures or notes)
 
 ## Links
 Documentaion - [https://swayamsahoo11742.github.io/](https://swayamsahoo11742.github.io/)
