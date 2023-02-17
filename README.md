@@ -33,6 +33,7 @@ print(scop.tempo.ratio)
 
 ```
 ## Future Plans
+Things to look forward in the next release, any suggestions will be appreciated
 - Time signature conversions
 - Tempo conversions
 - Extract a specific rhythm
