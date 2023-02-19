@@ -40,8 +40,8 @@ print(scop.tempo.ratio)
 🟢 = Done
 
 ### Things to look forward in the next release, any suggestions will be appreciated
-- Time signature conversions 🟡
-- Tempo conversions 🟠
+- Time signature conversions 🟢
+- Tempo conversions 🟡
 - Extract a specific rhythm 🟠 
 - Altering MIDI (adding/Deleting measures or notes) 🟠
 
