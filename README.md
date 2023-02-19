@@ -33,23 +33,26 @@ print(scop.tempo.ratio)
 
 ```
 ## Future Plans
+🟡 = In progress
+🟠 = To-Do
+🟢 = Done
 ### Things to look forward in the next release, any suggestions will be appreciated
-- Time signature conversions 🟡in-progress🟡
-- Tempo conversions 🟠 To-Do 🟠
-- Extract a specific rhythm 🟠 To-Do 🟠
-- Altering MIDI (adding/Deleting measures or notes) 🟠 To-Do 🟠
+- Time signature conversions 🟡
+- Tempo conversions 🟠
+- Extract a specific rhythm 🟠 
+- Altering MIDI (adding/Deleting measures or notes) 🟠
 
 ### Things for the distant future, any suggestions will be appreciated
-- Chord extraction: Allow the extraction of chord progressions from the MIDI file.
-- Key detection: Implement a function to detect the key of the MIDI file.
-- Melody extraction: Allow the extraction of the melody from the MIDI file.
-- Harmonic analysis: Provide harmonic analysis of the MIDI file by identifying chords and their progressions.
-- Drum track extraction: Allow the extraction of the drum track from the MIDI file.
-- Time signature detection: Implement a function to detect the time signature of the MIDI file.
-- Quantization: Implement a function to quantize the notes in the MIDI file to a particular grid size.
+- Chord extraction: Allow the extraction of chord progressions from the MIDI file.🟠
+- Key detection: Implement a function to detect the key of the MIDI file.🟠
+- Melody extraction: Allow the extraction of the melody from the MIDI file.🟠
+- Harmonic analysis: Provide harmonic analysis of the MIDI file by identifying chords and their progressions.🟠
+- Drum track extraction: Allow the extraction of the drum track from the MIDI file.🟠
+- Time signature detection: Implement a function to detect the time signature of the MIDI file.🟠
+- Quantization: Implement a function to quantize the notes in the MIDI file to a particular grid size.🟠
 - Instrument recognition: Provide functionality to recognize the instruments used in the MIDI file.
-- MIDI file validation: Implement a function to validate the structure of the MIDI file and detect any errors.
-- Export to other formats: Allow the export of the MIDI data to other formats such as CSV, JSON, or XML.
+- MIDI file validation: Implement a function to validate the structure of the MIDI file and detect any errors.🟠
+- Export to other formats: Allow the export of the MIDI data to other formats such as CSV, JSON, or XML.🟠
 
 ## Links
 Documentaion - [https://swayamsahoo11742.github.io/](https://swayamsahoo11742.github.io/)
