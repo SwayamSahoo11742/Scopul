@@ -34,8 +34,11 @@ print(scop.tempo.ratio)
 ```
 ## Future Plans
 🟡 = In progress
+
 🟠 = To-Do
+
 🟢 = Done
+
 ### Things to look forward in the next release, any suggestions will be appreciated
 - Time signature conversions 🟡
 - Tempo conversions 🟠
