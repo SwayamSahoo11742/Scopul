@@ -1,6 +1,12 @@
-from music21 import converter, environment, instrument
+from music21 import converter, environment
 import os
-from Scopul.scopul_exception import InvalidFileFormatError, InvalidMusicElementError, NoMusePathError
+import pathlib
+from collections.abc import Iterable
+from Scopul.scopul_exception import (
+    InvalidFileFormatError,
+    InvalidMusicElementError,
+    NoMusePathError,
+)
 from mido import bpm2tempo, tempo2bpm, MidiFile
 
 # Setting up music21 with MuseScore
@@ -9,8 +15,7 @@ from Scopul.Tempo import Tempo
 from Scopul.Sequence import Part, Rest, Chord, Note
 
 
-class Scopul():
-
+class Scopul:
     def __init__(self, audio):
         self.construct(audio)
 
@@ -36,6 +41,7 @@ class Scopul():
     def midi(self):
         """Retrieves midi file"""
         return self._midi
+
     @property
     def parts(self) -> list:
         """Retrieves a list of Part objects
@@ -79,28 +85,28 @@ class Scopul():
             env["musicxmlPath"] = os.environ["MUSESCORE_PATH"]
             env["musescoreDirectPNGPath"] = os.environ["MUSESCORE_PATH"]
         except:
-            raise NoMusePathError("Path to musescore not set. please set using config_musescore()")
-        
+            raise NoMusePathError(
+                "Path to musescore not set. please set using config_musescore()"
+            )
+
         # checking for existance of the path
-        if os.path.exists(os.environ["MUSESCORE_PATH"]) == False:
-            raise FileNotFoundError(f"MuseScore path at {os.environ['MUSESCORE_PATH']} not found. Please check to see if it exists")
-        
+        if not pathlib.Path(os.environ["MUSESCORE_PATH"]).exists():
+            raise FileNotFoundError(
+                f"MuseScore path at {os.environ['MUSESCORE_PATH']} not found. Please check to see if it exists"
+            )
 
         # Check for correct file format
-        ext = os.path.splitext(output)[1]
+        ext = pathlib.Path(output).suffix
         if ext != ".pdf":
             raise InvalidFileFormatError(f"Expected .pdf, got {ext}")
+
         # Check for overwrite
         if overwrite:
-            # Check for file existance
-            if os.path.exists(fp + output):
-                # Remove it
+            if pathlib.Path(fp + output).exists():
                 os.remove(fp + output)
         # If not overwrite
         else:
-            # Check existance
-            if os.path.exists(fp + output):
-                # IF exists, raise error
+            if pathlib.Path(fp + output).exists():
                 raise FileExistsError(
                     f"{fp + output} already exists. To overwrite, set overwrite=True"
                 )
@@ -134,27 +140,28 @@ class Scopul():
             env["musicxmlPath"] = os.environ["MUSESCORE_PATH"]
             env["musescoreDirectPNGPath"] = os.environ["MUSESCORE_PATH"]
         except:
-            raise NoMusePathError("Path to musescore not set. please set using config_musescore()")
-        
+            raise NoMusePathError(
+                "Path to musescore not set. please set using config_musescore()"
+            )
+
         # Checking for existance of the path
-        if os.path.exists(os.environ["MUSESCORE_PATH"]) == False:
-            raise FileNotFoundError(f"MuseScore path at {os.environ['MUSESCORE_PATH']} not found. Please check to see if it exists")
+        if not pathlib.Path(os.environ["MUSESCORE_PATH"]):
+            raise FileNotFoundError(
+                f"MuseScore path at {os.environ['MUSESCORE_PATH']} not found. Please check to see if it exists"
+            )
 
         # Check for correct file format
-        ext = os.path.splitext(output)[1]
+        ext = pathlib.Path(output).suffix
         if ext != ".xml":
             raise InvalidFileFormatError(f"Expected .xml, got {ext}")
+
         # Check for overwrite
         if overwrite:
-            # Check for file existance
-            if os.path.exists(fp + output):
-                # Remove it
+            if pathlib.Path(fp + output).exists():
                 os.remove(fp + output)
         # If not overwrite
         else:
-            # Check existance
-            if os.path.exists(fp + output):
-                # IF exists, raise error
+            if pathlib.Path(fp + output).exists():
                 raise FileExistsError(
                     f"{fp + output} already exists. To overwrite, set overwrite=True"
                 )
@@ -175,54 +182,54 @@ class Scopul():
 
         self._audio = audio
         self._midi = converter.parse(audio)
-        self._time_sig = TimeSignature(audio)
-        self._tempo = Tempo(audio)
+        self._time_sig = TimeSignature(self)
+        self._tempo = Tempo(self)
         self._parts = []
         for part in self.midi.parts:
             self._parts.append(Part(part))
 
-    @classmethod
-    def midi_tempo2bpm(self, tempo: int | list) -> float | list:
-        """Converts a midi tempo value to bpm
 
-        Args:
-            tempo: an int
+def midi_tempo2bpm(tempo: int | Iterable) -> float | list:
+    """Converts a midi tempo value to bpm
 
-        Returns:
-            A list or an int, depending on the input.
+    Args:
+        tempo: an int
 
-            EX (int input):
-                65
-            OR (list input):
-                [125,50,65]
-        """
-        try:
-            if type(tempo) == int:
-                return tempo2bpm(tempo)
-            elif type(tempo) == list:
-                return [tempo2bpm(m) for m in tempo]
-        except TypeError:
-            raise TypeError("midi_tempo2bpm only accepts str or list objects")
+    Returns:
+        A list or an int, depending on the input.
 
-    @classmethod
-    def bpm2midi_tempo(self, tempo: int | list) -> float | list:
-        """Converts a bpm value to midi tempo
+        EX (int input):
+            65
+        OR (list input):
+            [125,50,65]
+    """
+    try:
+        if isinstance(tempo, int):
+            return tempo2bpm(tempo)
+        elif isinstance(tempo, Iterable):
+            return [tempo2bpm(temp) for temp in tempo]
+    except TypeError:
+        raise TypeError("midi_tempo2bpm only accepts str or iterable objects")
 
-        Args:
-            tempo: an int
 
-        Returns:
-            List or Str object, depending on the input
+def bpm2midi_tempo(tempo: int | list) -> float | list:
+    """Converts a bpm value to midi tempo
 
-            EX (int input):
-                10000
-            OR (list input):
-                [10000,896534,23334]
-        """
-        try:
-            if type(tempo) == int:
-                return bpm2tempo(tempo)
-            elif type(tempo) == list:
-                return [bpm2tempo(m) for m in tempo]
-        except TypeError:
-            raise TypeError("bpm2midi_tempo only accepts str or list objects")
+    Args:
+        tempo: an int
+
+    Returns:
+        List or Str object, depending on the input
+
+        EX (int input):
+            10000
+        OR (list input):
+            [10000,896534,23334]
+    """
+    try:
+        if isinstance(tempo, int):
+            return bpm2tempo(tempo)
+        elif isinstance(tempo, Iterable):
+            return [bpm2tempo(temp) for temp in tempo]
+    except TypeError:
+        raise TypeError("bpm2midi_tempo only accepts str or iterable objects")

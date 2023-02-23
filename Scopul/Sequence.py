@@ -1,6 +1,7 @@
 from music21 import note, chord
 from Scopul.scopul_exception import InvalidMusicElementError
 from Scopul.conversions import note_to_number
+from collections.abc import Iterable
 
 
 class Part:
@@ -9,7 +10,7 @@ class Part:
     """
 
     def __init__(self, part) -> None:
-        self.part = part
+        self._part = part
         self.name = part.partName
         self.sequence = []
         # Looping through the part
@@ -38,22 +39,22 @@ class Part:
         # Notes list
         notes = []
 
-        # If not a list, raise error
-        if type(seq) != list:
+        # If not a iterable, raise error
+        if not isinstance(seq, Iterable):
             raise TypeError(
-                "Not a list. Include a list of Scopul Rests, Chords or Note"
+                "Not an iterable. Include a iterable object of Scopul Rests, Chords or Note"
             )
 
         # loop through the sequence
-        for idx, i in enumerate(seq):
+        for idx, element in enumerate(seq):
             # If its not a scopul sequence, raise error
-            if type(i) not in [Chord, Note, Rest]:
+            if not isinstance(element, (Chord, Rest, Note)):
                 raise InvalidMusicElementError(
-                    f"Please include a valid Scopul Sequence that contains Chord, Rest or Note objects. Invalid type found : {type(i)} at index {idx}"
+                    f"Please include a valid Scopul Sequence that contains Chord, Rest or Note objects. Invalid type found : {type(element)} at index {idx}"
                 )
             # Append to list
-            if type(i) == Note:
-                notes.append(i)
+            if isinstance(element, Note):
+                notes.append(element)
 
         return notes
 
@@ -78,22 +79,22 @@ class Part:
         # rests list
         rests = []
 
-        # If not a list, raise error
-        if type(seq) != list:
+        # If not a iterable, raise error
+        if not isinstance(seq, Iterable):
             raise TypeError(
-                "Not a list. Include a list of Scopul Rests, Chords or Note"
+                "Not an iterable. Include a iterable object of Scopul Rests, Chords or Note"
             )
 
         # loop through the sequence
-        for idx, i in enumerate(seq):
+        for idx, element in enumerate(seq):
             # If its not a scopul sequence, raise error
-            if type(i) not in [Chord, Note, Rest]:
+            if not isinstance(element, (Chord, Rest, Note)):
                 raise InvalidMusicElementError(
-                    f"Please include a valid Scopul Sequence that contains Chord, Rest or Note objects. Invalid type found : {type(i)} at index {idx}"
+                    f"Please include a valid Scopul Sequence that contains Chord, Rest or Note objects. Invalid type found : {type(element)} at index {idx}"
                 )
             # Append to list
-            if type(i) == Rest:
-                rests.append(i)
+            if isinstance(element, Note):
+                rests.append(element)
 
         return rests
 
@@ -119,22 +120,22 @@ class Part:
         # chords list
         chords = []
 
-        # If not a list, raise error
-        if type(seq) != list:
+        # If not a iterable, raise error
+        if not isinstance(seq, Iterable):
             raise TypeError(
-                "Not a list. Include a list of Scopul Rests, Chords or Note"
+                "Not an iterable. Include a iterable object of Scopul Rests, Chords or Note"
             )
 
         # loop through the sequence
-        for idx, i in enumerate(seq):
+        for idx, element in enumerate(seq):
             # If its not a scopul sequence, raise error
-            if type(i) not in [Chord, Note, Rest]:
+            if not isinstance(element, (Chord, Rest, Note)):
                 raise InvalidMusicElementError(
-                    f"Please include a valid Scopul Sequence that contains Chord, Rest or Note objects. Invalid type found : {type(i)} at index {idx}"
+                    f"Please include a valid Scopul Sequence that contains Chord, Rest or Note objects. Invalid type found : {type(element)} at index {idx}"
                 )
             # Append to list
-            if type(i) == Chord:
-                chords.append(i)
+            if isinstance(element, Note):
+                chords.append(element)
 
         return chords
 
@@ -143,7 +144,7 @@ class Part:
         """Retrieves the number of notes"""
         return len(self.get_chords(seq))
 
-    def get_measure(self, m: int | list):
+    def get_measure(self, measures: int | list):
         """Fetches the contents of a measure.
 
         Retrieves about chords, notes and rest objects in the sequence
@@ -159,40 +160,40 @@ class Part:
             TypeError: if input is not a list of int
         """
         # If integer
-        if type(m) == int:
+        if isinstance(measures, int):
 
             # if invalid integer
-            if m <= 0:
+            if measures <= 0:
                 raise ValueError("get_measure only allows positive integers")
 
             seq = []
-            for i in self.sequence:
-                if i.measure == m:
-                    seq.append(i)
+            for element in self.sequence:
+                if element.measure == measures:
+                    seq.append(element)
             return seq
 
         # If list
-        elif type(m) == list:
+        elif isinstance(measures, Iterable):
 
             # Check for positive int
-            for i in m:
-                if i <= 0:
+            for measure in measures:
+                if measure <= 0:
                     raise ValueError("get_measure only allows positive integers")
 
             # check for only start and end values
-            if len(m) != 2:
+            if len(measures) != 2:
                 raise ValueError("usage: get_measure([start, end])")
 
             seq = []
-            for i in self.sequence:
-                if i.measure in range(m[0], m[1] + 1):
-                    seq.append(i)
+            for element in self.sequence:
+                if element.measure in range(measures[0], measures[1] + 1):
+                    seq.append(element)
             return seq
 
         # Incorrect type
         else:
             raise TypeError(
-                f"get_measure only accepts int or list, instead got {type(m)}"
+                f"get_measure only accepts int or iterable, instead got {type(measures)}"
             )
 
     def get_highest_note(self, seq: list):
@@ -211,26 +212,25 @@ class Part:
         highest = 0
 
         # If not a list, raise error
-        if type(seq) != list:
+        if not isinstance(seq, Iterable):
             raise TypeError(
                 "Not a list. Include a list of Scopul Rests, Chords or Note"
             )
 
         # loop through the sequence
-        for idx, i in enumerate(seq):
-            # If its not a scopul sequence, raise error
-            if type(i) not in [Chord, Note, Rest]:
+        for idx, element in enumerate(seq):
+            if not isinstance(element, (Chord, Rest, Note)):
                 raise InvalidMusicElementError(
-                    f"Please include a valid Scopul Sequence that contains Chord, Rest or Note objects. Invalid type found : {type(i)} at index {idx}"
+                    f"Please include a valid Scopul Sequence that contains Chord, Rest or Note objects. Invalid type found : {type(element)} at index {idx}"
                 )
             # Append to list
-            if type(i) == Note:
+            if isinstance(element, Note):
                 if highest == 0:
-                    highest = i
+                    highest = element
                 else:
-                    note_val = note_to_number(i.name[0], int(i.name[1]))
+                    note_val = note_to_number(element.name[0], int(element.name[1]))
                     if note_val > note_to_number(highest.name[0], int(highest.name[1])):
-                        highest = i
+                        highest = element
 
         return highest
 
@@ -303,7 +303,7 @@ class Chord:
 
     def __init__(self, chord) -> None:
         # Converting to notes
-        self._notes = [Note(n) for n in list(chord.notes)]
+        self._notes = [Note(note) for note in list(chord.notes)]
         self._measure = chord.measureNumber
         self._lenght = chord.duration.type
 
