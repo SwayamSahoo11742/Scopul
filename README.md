@@ -57,6 +57,7 @@ print(scop.tempo.ratio)
 - MIDI file validation: Implement a function to validate the structure of the MIDI file and detect any errors.🟠
 - Export to other formats: Allow the export of the MIDI data to other formats such as CSV, JSON, or XML.🟠
 
+#### **NOTE: The pace of development has been slowed down due to my current enrollment in a course. 
 ## Links
 Documentaion - [https://swayamsahoo11742.github.io/](https://swayamsahoo11742.github.io/)
 
