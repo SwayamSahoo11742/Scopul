@@ -62,7 +62,13 @@ class Scopul:
         return MidiFile(self._audio).length
 
     # Generate a pdf
-    def generate_pdf(self, output: str, fp: str = "", overwrite: bool = False) -> None:
+    def generate_pdf(
+        self,
+        output: str,
+        fp: str = "",
+        overwrite: bool = False,
+        remove_defects: bool = False,
+    ) -> None:
         """Generates a pdf of the midi
 
         Creates a pdf by turning it into musicxml then to pdf
@@ -71,6 +77,7 @@ class Scopul:
             output: a str that represents the name of the file
             fp: a str that represents the file path as to where to save the pdf. Default is '', which will save to the current working directory
             overwrite: a boolean, indicates whether to overwrite files or not
+            remove_defects: a boolean, indicates whether to remove defective parts or not
 
         Returns:
             None, just generates a pdf in the path specified with the name specified
@@ -100,6 +107,15 @@ class Scopul:
         if ext != ".pdf":
             raise InvalidFileFormatError(f"Expected .pdf, got {ext}")
 
+        midi = self.midi
+
+        if remove_defects:
+            for part in midi.parts:
+                try:
+                    part.write("musicxml.pdf")
+                except:
+                    midi.remove(part)
+
         # Check for overwrite
         if overwrite:
             if pathlib.Path(fp + output).exists():
@@ -112,13 +128,17 @@ class Scopul:
                 )
 
         # Creates the pdf and deletes the musicxml file
-        self.midi.metadata.title = output.split(".")[0]
-        self.midi.write("musicxml.pdf", fp=fp)
+        midi.metadata.title = output.split(".")[0]
+        midi.write("musicxml.pdf", fp=fp)
         os.rename(fp + ".musicxml.pdf", fp + output)
         os.remove(fp + ".musicxml.musicxml")
 
     def generate_musicxml(
-        self, output: str, fp: str = "", overwrite: bool = False
+        self,
+        output: str,
+        fp: str = "",
+        overwrite: bool = False,
+        remove_defects: bool = False,
     ) -> None:
         """Generates a musicxml of the midi
 
@@ -126,6 +146,7 @@ class Scopul:
             output: a str that represents the name of the file
             fp: a str that represents the file path as to where to save the pdf. Default is '', which will save to the current working directory
             overwrite: a boolean, indicates whether to overwrite files or not
+            remove_defects: a boolean, indicates whether to remove defective parts or not
 
         Returns:
             None, just generates a pdf in the path specified with the name specified
@@ -155,16 +176,26 @@ class Scopul:
         if ext != ".xml":
             raise InvalidFileFormatError(f"Expected .xml, got {ext}")
 
+        midi = self.midi
+
         # Check for overwrite
         if overwrite:
             if pathlib.Path(fp + output).exists():
                 os.remove(fp + output)
+
         # If not overwrite
         else:
             if pathlib.Path(fp + output).exists():
                 raise FileExistsError(
                     f"{fp + output} already exists. To overwrite, set overwrite=True"
                 )
+
+        if remove_defects:
+            for part in midi.parts:
+                try:
+                    part.write("musicxml.pdf")
+                except:
+                    midi.remove(part)
 
         # Creates the pdf and deletes the musicxml file
         self.midi.write("musicxml.xml", fp=fp)

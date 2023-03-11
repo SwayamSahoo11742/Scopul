@@ -2,6 +2,7 @@ from music21 import converter, tempo, note, chord, stream, tempo
 from mido import bpm2tempo
 from Scopul.scopul_exception import MeasureNotFoundException
 from Scopul.Sequence import Part
+from Scopul.helpers import get_tempos
 
 
 class Tempo:
@@ -102,14 +103,3 @@ class Tempo:
 
             # Insert the MetronomeMark object at the beginning of the measure
             measure.insert(0, new_tempo)
-
-
-def get_tempos(midi):
-    lst = []
-    for meta_message in midi.flat:
-        if isinstance(meta_message, tempo.MetronomeMark):
-            lst.append(
-                {"tempo": meta_message.number, "measure": meta_message.measureNumber}
-            )
-
-    return lst

@@ -2,6 +2,8 @@ from music21 import note, chord
 from Scopul.scopul_exception import InvalidMusicElementError
 from Scopul.conversions import note_to_number
 from collections.abc import Iterable
+from Scopul.helpers import sublist
+import re
 
 
 class Part:
@@ -234,11 +236,107 @@ class Part:
 
         return highest
 
+    # rhythm -> List of rhythm
+    # gets a list of all the occurances of a rhythm in the current part
+    def get_rhythm(self, rhythm: Iterable):
+        """gets a list of all the occurances of a rhythm in the current part
+
+        Args:
+            rhythm: a list where each element represents a rhythm
+                the elements in the list must be the note's quarter lenght (For example, 1 would be quarter note, 0.5 will be eight note)
+                For example:
+                    [1, 1, 0.5, 0.5, 2]
+                    this will be a rhythm of quarter, quarter, eighth, eighth, half
+
+                Can specify note type using the following format:
+                    [[type, quarterLenght], [type, quarterLenght] ...]
+
+                    For Example:
+                    [["c", 0.75], ["r", 0.25]]
+                    This will search for rhythms with dotted-eight chords followed by 16th rest
+
+                    Types:
+                        r: Rest
+                        c: Chord
+                        n: Note
+
+            overlap: Boolean, will determine whether or not to retrieve overlaping cases
+
+            Returns:
+                a list of lists, with each list containing the Scopul musical element objects that satisfy the rhythm:
+                For Example:
+                    get_rhythm([1, 1, 2])
+
+                    >>> [[Scopul.Note, Scopul.Note, Scopul.Rest], [Scopul.Rest, Scopul.Rest, Scopul.Chord]] # Sample output
+        """
+
+        # Creating the note type list
+        type_list = []
+
+        for note in rhythm:
+            try:
+                if note[0] not in ["r", "c", "n"]:
+                    raise TypeError
+
+                type_list.append(note[0])
+
+            except TypeError:
+                type_list.append(None)
+
+        # Create rhythm type regex
+        type_regex = [re.escape(x) if x is not None else "." for x in type_list]
+        type_regex = "^" + "".join(type_regex) + "$"
+
+        # Creating rhythm list
+        rhythm_list = []
+
+        for note in rhythm:
+            try:
+                rhythm_list.append(note[-1])
+
+            except TypeError:
+                rhythm_list.append(note)
+
+        # Filtering part by rhythm
+
+        seq_element_list = [element for element in self.sequence]
+        seq_ql_list = [element.music21.quarterLength for element in self.sequence]
+
+        # Use the sublist function to find all occurrences of the given rhythm in the sequence
+        rhythm_indices = sublist(seq_ql_list, rhythm_list, overlap=False)
+
+        # Extract the sublists of elements that correspond to the found rhythmic patterns
+        rhythm_list = [seq_element_list[i[0] : i[-1] + 1] for i in rhythm_indices]
+
+        # Filter part by note types
+        final_list = []
+        for sequence in rhythm_list:
+            # Comparing rhythm type regex to sequence note types
+            match = re.match(
+                type_regex,
+                "".join(
+                    [
+                        "c"
+                        if type(element) == Chord
+                        else "r"
+                        if type(element) == Rest
+                        else "n"
+                        for element in sequence
+                    ]
+                ),
+            )
+            if match:
+                final_list.append(sequence)
+
+        # Return the list of rhythmic patterns
+        return final_list
+
 
 class Note:
     """A Class for all the notes"""
 
     def __init__(self, note) -> None:
+        self.music21 = note
         self._name = note.pitch.nameWithOctave
         self._measure = note.measureNumber
         self._velocity = note.volume.velocity
@@ -280,6 +378,7 @@ class Rest:
     """A Class for all the rests"""
 
     def __init__(self, rest) -> None:
+        self.music21 = rest
         self._measure = rest.measureNumber
         self._lenght = rest.duration.type
 
@@ -303,6 +402,7 @@ class Chord:
 
     def __init__(self, chord) -> None:
         # Converting to notes
+        self.music21 = chord
         self._notes = [Note(note) for note in list(chord.notes)]
         self._measure = chord.measureNumber
         self._lenght = chord.duration.type
