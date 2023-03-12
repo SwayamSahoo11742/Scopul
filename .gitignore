@@ -10,3 +10,5 @@ MANIFEST.in
 build/
 dist/
 scopul.egg-info/
+plans.txt
+*.pdf
