@@ -218,49 +218,25 @@ class Scopul:
         self._parts = []
         for part in self.midi.parts:
             self._parts.append(Part(part))
+        
+    def save_midi(self, output, fp="", overwrite=False):
+        # Check for correct file format
+        ext = pathlib.Path(output).suffix
+        if ext != ".mid":
+            raise InvalidFileFormatError(f"Expected .mid, got {ext}")
 
+        midi = self.midi
 
-def midi_tempo2bpm(tempo: int | Iterable) -> float | list:
-    """Converts a midi tempo value to bpm
+        # Check for overwrite
+        if overwrite:
+            if pathlib.Path(fp + output).exists():
+                os.remove(fp + output)
 
-    Args:
-        tempo: an int
-
-    Returns:
-        A list or an int, depending on the input.
-
-        EX (int input):
-            65
-        OR (list input):
-            [125,50,65]
-    """
-    try:
-        if isinstance(tempo, int):
-            return tempo2bpm(tempo)
-        elif isinstance(tempo, Iterable):
-            return [tempo2bpm(temp) for temp in tempo]
-    except TypeError:
-        raise TypeError("midi_tempo2bpm only accepts str or iterable objects")
-
-
-def bpm2midi_tempo(tempo: int | list) -> float | list:
-    """Converts a bpm value to midi tempo
-
-    Args:
-        tempo: an int
-
-    Returns:
-        List or Str object, depending on the input
-
-        EX (int input):
-            10000
-        OR (list input):
-            [10000,896534,23334]
-    """
-    try:
-        if isinstance(tempo, int):
-            return bpm2tempo(tempo)
-        elif isinstance(tempo, Iterable):
-            return [bpm2tempo(temp) for temp in tempo]
-    except TypeError:
-        raise TypeError("bpm2midi_tempo only accepts str or iterable objects")
+        # If not overwrite
+        else:
+            if pathlib.Path(fp + output).exists():
+                raise FileExistsError(
+                    f"{fp + output} already exists. To overwrite, set overwrite=True"
+                )
+        
+        midi.write("midi", fp=fp + output)

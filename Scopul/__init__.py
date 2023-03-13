@@ -1,4 +1,5 @@
-from Scopul.scopul import Scopul, midi_tempo2bpm, bpm2midi_tempo
+from Scopul.scopul import Scopul
+from Scopul.helpers import midi_tempo2bpm, tempo2bpm, sublist, get_tempos
 from Scopul.scopul_exception import InvalidFileFormatError, InvalidMusicElementError
 from Scopul.TimeSignature import TimeSignature
 from Scopul.Tempo import Tempo

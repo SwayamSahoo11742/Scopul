@@ -1,5 +1,6 @@
 from music21 import tempo
-
+from collections.abc import Iterable
+from mido import tempo2bpm, bpm2tempo
 
 def sublist(lst, sublist, overlap=False):
     """
@@ -63,3 +64,48 @@ def get_tempos(midi):
             )
 
     return lst
+
+def midi_tempo2bpm(tempo: int | Iterable) -> float | list:
+    """Converts a midi tempo value to bpm
+
+    Args:
+        tempo: an int
+
+    Returns:
+        A list or an int, depending on the input.
+
+        EX (int input):
+            65
+        OR (list input):
+            [125,50,65]
+    """
+    try:
+        if isinstance(tempo, int):
+            return tempo2bpm(tempo)
+        elif isinstance(tempo, Iterable):
+            return [tempo2bpm(temp) for temp in tempo]
+    except TypeError:
+        raise TypeError("midi_tempo2bpm only accepts str or iterable objects")
+
+
+def bpm2midi_tempo(tempo: int | list) -> float | list:
+    """Converts a bpm value to midi tempo
+
+    Args:
+        tempo: an int
+
+    Returns:
+        List or Str object, depending on the input
+
+        EX (int input):
+            10000
+        OR (list input):
+            [10000,896534,23334]
+    """
+    try:
+        if isinstance(tempo, int):
+            return bpm2tempo(tempo)
+        elif isinstance(tempo, Iterable):
+            return [bpm2tempo(temp) for temp in tempo]
+    except TypeError:
+        raise TypeError("bpm2midi_tempo only accepts str or iterable objects")
