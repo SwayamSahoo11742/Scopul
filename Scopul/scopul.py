@@ -1,4 +1,4 @@
-from music21 import converter, environment
+from music21 import converter, environment, stream, note, tempo, chord, meter
 import os
 import pathlib
 from collections.abc import Iterable
@@ -6,6 +6,7 @@ from Scopul.scopul_exception import (
     InvalidFileFormatError,
     InvalidMusicElementError,
     NoMusePathError,
+    MeasureNotFoundException,
 )
 from mido import bpm2tempo, tempo2bpm, MidiFile
 
@@ -13,23 +14,38 @@ from mido import bpm2tempo, tempo2bpm, MidiFile
 from Scopul.TimeSignature import TimeSignature
 from Scopul.Tempo import Tempo
 from Scopul.Sequence import Part, Rest, Chord, Note
+from Scopul.helpers import get_tempos
 
 
 class Scopul:
     def __init__(self, audio):
         self.construct(audio)
 
-    # Tempo (tempo)
-    @property
-    def tempo(self) -> Tempo:
-        """Fetches Tempo object"""
-        return self._tempo
-
     # Time Signature (time_sig)
     @property
-    def time_sig(self) -> TimeSignature:
-        """Fetches the Time Signature object"""
-        return self._time_sig
+    def time_sig_list(self) -> TimeSignature:
+        """Fetches every occurance of a time signature.
+
+        Retrieves all the occurances of time signatures, with an optional ability to get unique signatures only.
+
+        Returns:
+            A list or set object with time signatures in it.
+
+
+        """
+        # List of signatures
+        sig_list = []
+
+        for meta_message in self.midi.flat:
+            if isinstance(meta_message, meter.TimeSignature):
+                sig_list.append(
+                    TimeSignature(
+                        value=meta_message.ratioString,
+                        measure=meta_message.measureNumber,
+                    )
+                )
+
+        return sig_list
 
     # Midi File (midi)
     @property
@@ -57,10 +73,25 @@ class Scopul:
         """Allows to reconstruct the object to change accordingly to a new midi"""
         self.construct(audio)
 
-    def get_audio_lenght(self) -> int:
-        """Returns the audio lenght"""
+    def get_audio_length(self) -> int:
+        """Returns the audio length"""
         return MidiFile(self._audio).length
 
+    @property
+    def tempo_list(self):
+        """Fetches the tempo list in bpm format
+
+        Fetches the time signatures in bpm with both measure numbers and the tempo
+
+        Returns:
+            A list of dict objects with 2 keys: "tempo" and "measure". For example:
+
+            [{"tempo":36, "measure": 1},{"tempo":5, "measure": 56}]
+
+        """
+        return get_tempos(self._midi)
+
+    # ================================== METHODS=============================================
     # Generate a pdf
     def generate_pdf(
         self,
@@ -213,12 +244,10 @@ class Scopul:
 
         self._audio = audio
         self._midi = converter.parse(audio)
-        self._time_sig = TimeSignature(self)
-        self._tempo = Tempo(self)
         self._parts = []
         for part in self.midi.parts:
             self._parts.append(Part(part))
-        
+
     def save_midi(self, output, fp="", overwrite=False):
         # Check for correct file format
         ext = pathlib.Path(output).suffix
@@ -238,5 +267,120 @@ class Scopul:
                 raise FileExistsError(
                     f"{fp + output} already exists. To overwrite, set overwrite=True"
                 )
-        
+
         midi.write("midi", fp=fp + output)
+
+    def add_tempo(self, bpm_tempo: int, part, measure_number: int = 1):
+        """
+        Adds a metronome mark at the specified measure in a part object.
+
+        Args:
+            part: A Scopul Part object representing a musical part.
+            measure_number: An integer specifying the measure number where the
+                metronome mark should be added.
+            tempo: A floating point number representing the tempo in beats per
+                minute (BPM) for the metronome mark.
+
+        Returns:
+            None.
+
+        Raises:
+            TypeError: If part is not a Scopul part object
+            ValueError: If measure_number is not a positive integer
+            ValueError: If tempo is not a positive number.
+            MeasureNotFoundError: If given measure does not exist
+
+        If a metronome mark already exists at the specified location, its tempo
+        will be updated to the new tempo value
+        """
+        # Checking if part is a scopul part
+        if not isinstance(part, Part):
+            raise TypeError("Provided part is not a Scopul Part object")
+
+        part = part._part
+
+        # Checking if measure is a number
+        if not isinstance(measure_number, (int, float)):
+            raise ValueError("measure must be a positive number")
+
+        # Checking if measure exists
+        if measure_number <= 0 or measure_number > len(part):
+            raise MeasureNotFoundException(f"measure {measure_number} does not exist")
+
+        #  Checking if tempo in valid
+        if not isinstance(bpm_tempo, (int, float)) or bpm_tempo <= 0:
+            raise ValueError("Tempo must be a positive number")
+
+        # Find the measure at the specified measure_number
+
+        new_part = stream.Stream()
+
+        # copying into new part with modified time
+        mark_added = False
+        for element in part.flat:
+
+            if element.measureNumber == measure_number and not mark_added:
+                new_part.append(tempo.MetronomeMark(number=bpm_tempo))
+                mark_added = True
+
+            if isinstance(
+                element,
+                (
+                    note.Note,
+                    note.Rest,
+                    chord.Chord,
+                    tempo.MetronomeMark,
+                    meter.TimeSignature,
+                ),
+            ):
+                new_part.append(element)
+
+        new_part = new_part.makeMeasures()
+        self.midi.replace(part, new_part)
+
+    def add_TimeSignature(self, time_sig: str, part, measure: int = 1) -> None:
+        """A method to add a timesignature to a piece
+
+        Args:
+            time_sig: a str object representing the int. For example - "3/4"
+            part: the Part object you want to modify
+            measure: an int, representing the measure number you want to add this time signature. Default is one
+
+        Returns:
+            None, only modifies the midi
+
+        """
+        # Getting the Music21 converter object and the Muic21 part object
+        midi_file = self.midi
+        part = part._part
+
+        # Looking for measure
+        if part[-1].measureNumber < measure:
+            raise MeasureNotFoundException(
+                f"Measure {measure} was not found in this part"
+            )
+
+        new_part = stream.Stream()
+
+        # copying into new part with modified time
+        time_added = False
+        for element in part.flat:
+
+            if element.measureNumber == measure and not time_added:
+                new_part.append(meter.TimeSignature(time_sig))
+                time_added = True
+
+            if isinstance(
+                element,
+                (
+                    note.Note,
+                    note.Rest,
+                    chord.Chord,
+                    meter.TimeSignature,
+                    tempo.MetronomeMark,
+                ),
+            ):
+                new_part.append(element)
+
+        new_part = new_part.makeMeasures()
+        midi_file.replace(part, new_part)

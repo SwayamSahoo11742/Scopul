@@ -1,4 +1,4 @@
-from music21 import note, chord
+import music21
 from Scopul.scopul_exception import InvalidMusicElementError
 from Scopul.conversions import note_to_number
 from collections.abc import Iterable
@@ -18,11 +18,11 @@ class Part:
         # Looping through the part
         for element in part.recurse():
             # Setting the class and appending depending on the type of symbol
-            if isinstance(element, note.Note):
+            if isinstance(element, music21.note.Note):
                 self.sequence.append(Note(element))
-            elif isinstance(element, chord.Chord):
+            elif isinstance(element, music21.chord.Chord):
                 self.sequence.append(Chord(element))
-            elif isinstance(element, note.Rest):
+            elif isinstance(element, music21.note.Rest):
                 self.sequence.append(Rest(element))
 
     # Note list
@@ -158,7 +158,7 @@ class Part:
             A list with all the contents in the measure(s) requested
 
         Raises:
-            ValueError: if inputted negative number, or a list with not lenght of 2
+            ValueError: if inputted negative number, or a list with not length of 2
             TypeError: if input is not a list of int
         """
         # If integer
@@ -243,13 +243,13 @@ class Part:
 
         Args:
             rhythm: a list where each element represents a rhythm
-                the elements in the list must be the note's quarter lenght (For example, 1 would be quarter note, 0.5 will be eight note)
+                the elements in the list must be the note's quarter length (For example, 1 would be quarter note, 0.5 will be eight note)
                 For example:
                     [1, 1, 0.5, 0.5, 2]
                     this will be a rhythm of quarter, quarter, eighth, eighth, half
 
                 Can specify note type using the following format:
-                    [[type, quarterLenght], [type, quarterLenght] ...]
+                    [[type, quarterlength], [type, quarterlength] ...]
 
                     For Example:
                     [["c", 0.75], ["r", 0.25]]
@@ -335,12 +335,38 @@ class Part:
 class Note:
     """A Class for all the notes"""
 
-    def __init__(self, note) -> None:
-        self.music21 = note
-        self._name = note.pitch.nameWithOctave
-        self._measure = note.measureNumber
-        self._velocity = note.volume.velocity
-        self._lenght = note.duration.type
+    def __init__(self, note=None, name=None, length=None) -> None:
+        """
+        A class representing a music note.
+
+        Args:
+            note: A music21 note object (optional).
+            name: A string representing the name of the note in 'note octave' format (optional).
+            length: A float or int representing the length of the note (optional).
+
+        Raises:
+            ValueError: If name is provided but is not in 'note octave' format.
+            TypeError: If length is provided but is not a float or int.
+        """
+
+        if note is not None:
+            self.music21 = note
+            self._measure = note.measureNumber
+            self._velocity = note.volume.velocity
+        else:
+            self.music21 = music21.note.Note(name, quarterLength=length)
+            self._measure = None
+            self._velocity = None
+
+        if name and not re.search(r"[a-zA-z][1-9]", name):
+            raise ValueError(
+                "name expects a note name in 'note octave' format, ex: 'A1' 'C4'"
+            )
+        self._name = name if name else self.music21.pitch.nameWithOctave
+
+        if length and not isinstance(length, (int, float)):
+            raise TypeError("length only accepts ints and floats")
+        self._length = length if length else self.music21.duration.quarterLength
 
     @property
     def name(self):
@@ -360,36 +386,45 @@ class Note:
 
     @property
     def velocity(self):
-        """Returns an int, representing velocity of the note"""
-        self._velocity
+        """Returns an int representing velocity of the note"""
+        return self._velocity
 
     @property
-    def lenght(self):
-        """Returns a str representing the lenght of the note
+    def length(self):
+        """Returns a str representing the length of the note
 
         Example:
             "quarter"
 
         """
-        return self._lenght
+        return self._length
 
 
 class Rest:
     """A Class for all the rests"""
 
-    def __init__(self, rest) -> None:
-        self.music21 = rest
-        self._measure = rest.measureNumber
-        self._lenght = rest.duration.type
+    def __init__(self, rest=None, length=None) -> None:
+
+        if length and isinstance(length, (int, float)):
+            self._length = length
+        else:
+            self._length = rest.duration.quarterLength
+
+        if rest is not None:
+            self.music21 = rest
+            self._measure = rest.measureNumber
+        else:
+            self._measure = None
+            self.music21 = music21.note.Rest(quarterlength=length)
 
     @property
-    def lenght(self):
-        """Returns a str, indicating the lenght of the rest
+    def length(self):
+        """Returns a str, indicating the length of the rest
 
         Example:
             "whole"
         """
-        return self._lenght
+        return self._length
 
     @property
     def measure(self):
@@ -400,21 +435,28 @@ class Rest:
 class Chord:
     """A Class to represent a chord (multiple notes at once)"""
 
-    def __init__(self, chord) -> None:
-        # Converting to notes
-        self.music21 = chord
-        self._notes = [Note(note) for note in list(chord.notes)]
-        self._measure = chord.measureNumber
-        self._lenght = chord.duration.type
+    def __init__(self, chord=None, notes: list = None) -> None:
+        if isinstance(chord, music21.chord.Chord):
+            self.music21 = chord
+            self._notes = [Note(note) for note in list(chord.notes)]
+            self._measure = chord.measureNumber
+            self._length = chord.duration.quarterLength
+        # if chord is not a music21 chord object
+        else:
+            notes = [note.music21 for note in notes]
+            self.music21 = music21.chord.Chord(notes)
+            self._notes = [Note(note) for note in notes]
+            self._measure = None
+            self._length = notes[0].duration.quarterLength
 
     @property
-    def lenght(self):
-        """Returns a str, representing the lenght of the chord
+    def length(self):
+        """Returns a str, representing the length of the chord
 
         Example:
             "eighth"
         """
-        return self._lenght
+        return self._length
 
     @property
     def measure(self):

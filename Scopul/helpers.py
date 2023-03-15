@@ -1,6 +1,8 @@
 from music21 import tempo
 from collections.abc import Iterable
 from mido import tempo2bpm, bpm2tempo
+from Scopul.Tempo import Tempo
+
 
 def sublist(lst, sublist, overlap=False):
     """
@@ -59,11 +61,10 @@ def get_tempos(midi):
     lst = []
     for meta_message in midi.flat:
         if isinstance(meta_message, tempo.MetronomeMark):
-            lst.append(
-                {"tempo": meta_message.number, "measure": meta_message.measureNumber}
-            )
+            lst.append(Tempo(meta_message.number, meta_message.measureNumber))
 
     return lst
+
 
 def midi_tempo2bpm(tempo: int | Iterable) -> float | list:
     """Converts a midi tempo value to bpm
