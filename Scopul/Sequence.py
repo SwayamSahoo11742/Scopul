@@ -244,9 +244,9 @@ class Part:
         return highest
 
     # rhythm -> List of rhythm
-    # gets a list of all the occurances of a rhythm in the current part
+    # gets a list of all the occurrences of a rhythm in the current part
     def get_rhythm(self, rhythm: Iterable):
-        """gets a list of all the occurances of a rhythm in the current part
+        """gets a list of all the occurrences of a rhythm in the current part
 
         Args:
             rhythm: a list where each element represents a rhythm
@@ -267,7 +267,7 @@ class Part:
                         c: Chord
                         n: Note
 
-            overlap: Boolean, will determine whether or not to retrieve overlaping cases
+            overlap: Boolean, will determine whether or not to retrieve overlapping cases
 
             Returns:
                 a list of lists, with each list containing the Scopul musical element objects that satisfy the rhythm:
