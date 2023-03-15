@@ -44,8 +44,9 @@ print(scop.tempo.ratio)
 - Tempo conversions 🟢
 - Extract a specific rhythm 🟢
 - Ability to save as MIDI 🟢
-- Altering MIDI (adding/Deleting measures or notes) 🟡
-- CONTRIBUTING.md will be updated with actual useful info
+- Altering MIDI (adding/Deleting measures or notes)🟢
+- Refactoring and adding documentation for the changes 🟡
+- CONTRIBUTING.md will be updated with actual useful info 🟡
 
 ### Things for the distant future, any suggestions will be appreciated
 - Chord extraction: Allow the extraction of chord progressions from the MIDI file.🟠

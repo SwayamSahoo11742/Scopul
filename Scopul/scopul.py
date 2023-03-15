@@ -138,7 +138,7 @@ class Scopul:
         if ext != ".pdf":
             raise InvalidFileFormatError(f"Expected .pdf, got {ext}")
 
-        midi = self.midi
+        midi = self.midi.makeMeasures()
 
         if remove_defects:
             for part in midi.parts:
@@ -243,7 +243,7 @@ class Scopul:
         """
 
         self._audio = audio
-        self._midi = converter.parse(audio)
+        self._midi = converter.parse(audio).makeMeasures()
         self._parts = []
         for part in self.midi.parts:
             self._parts.append(Part(part))
@@ -384,3 +384,49 @@ class Scopul:
 
         new_part = new_part.makeMeasures()
         midi_file.replace(part, new_part)
+
+    def add_note(self, element, part, measure_number=None, position=0):
+        """Add a musical element (Note, Rest, or Chord) to a measure in the given part.
+
+        Args:
+            element: A Scopul musical element (Note, Rest, or Chord) to add to the measure.
+            part: A music21 Part object representing the part to add the element to.
+            measure_number (optional): An integer specifying the measure number to add the element to.
+                If not provided, the element will be added to the last measure in the part.
+            position (optional): An integer specifying the position within the measure to add the element.
+                Defaults to 0 (the beginning of the measure).
+
+        Raises:
+            ValueError: If the given element is not a Scopul musical element (Note, Rest, or Chord),
+                or if no measure is found with the given measure number.
+
+        Returns:
+            None
+        """
+        if not isinstance(element, (Note, Rest, Chord)):
+            raise ValueError("Not a Scopul musical element (Notes, Rests, Chords)")
+        
+        if not measure_number:
+            # If no measure number is provided, add the element to the last measure in the part
+            measure_number = part.sequence[-1].measure
+
+        new_part = stream.Stream()
+
+        # copying into new part with modified time
+        element_added = False
+        for measure in part._part.getElementsByClass("Measure"):
+
+            if measure.number == measure_number and not element_added:
+                measure.insert(position, element._music21)
+                element_added = True
+
+            new_part.append(measure)
+
+        new_part = new_part.makeMeasures()
+        self.midi.replace(part, new_part)
+
+        
+        
+
+
+

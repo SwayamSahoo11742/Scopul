@@ -14,16 +14,23 @@ class Part:
     def __init__(self, part) -> None:
         self._part = part
         self.name = part.partName
-        self.sequence = []
+
+    @property
+    def sequence(self):
+        sequence = []
         # Looping through the part
-        for element in part.recurse():
+        for element in self._part.recurse():
             # Setting the class and appending depending on the type of symbol
             if isinstance(element, music21.note.Note):
-                self.sequence.append(Note(element))
+                sequence.append(Note(element))
             elif isinstance(element, music21.chord.Chord):
-                self.sequence.append(Chord(element))
+                sequence.append(Chord(element))
             elif isinstance(element, music21.note.Rest):
-                self.sequence.append(Rest(element))
+                sequence.append(Rest(element))
+        
+        return sequence
+
+
 
     # Note list
     def get_notes(self, seq: list) -> list:
@@ -300,7 +307,7 @@ class Part:
         # Filtering part by rhythm
 
         seq_element_list = [element for element in self.sequence]
-        seq_ql_list = [element.music21.quarterLength for element in self.sequence]
+        seq_ql_list = [element._music21.quarterLength for element in self.sequence]
 
         # Use the sublist function to find all occurrences of the given rhythm in the sequence
         rhythm_indices = sublist(seq_ql_list, rhythm_list, overlap=False)
@@ -335,7 +342,7 @@ class Part:
 class Note:
     """A Class for all the notes"""
 
-    def __init__(self, note=None, name=None, length=None) -> None:
+    def __init__(self, note=None, name=None, length=None, velocity=None, measure=None) -> None:
         """
         A class representing a music note.
 
@@ -350,23 +357,23 @@ class Note:
         """
 
         if note is not None:
-            self.music21 = note
+            self._music21 = note
             self._measure = note.measureNumber
             self._velocity = note.volume.velocity
         else:
-            self.music21 = music21.note.Note(name, quarterLength=length)
-            self._measure = None
-            self._velocity = None
+            self._music21 = music21.note.Note(name, quarterLength=length)
+            self._measure = velocity
+            self._velocity = measure
 
         if name and not re.search(r"[a-zA-z][1-9]", name):
             raise ValueError(
                 "name expects a note name in 'note octave' format, ex: 'A1' 'C4'"
             )
-        self._name = name if name else self.music21.pitch.nameWithOctave
+        self._name = name if name else self._music21.pitch.nameWithOctave
 
         if length and not isinstance(length, (int, float)):
             raise TypeError("length only accepts ints and floats")
-        self._length = length if length else self.music21.duration.quarterLength
+        self._length = length if length else self._music21.duration.quarterLength
 
     @property
     def name(self):
@@ -403,7 +410,7 @@ class Note:
 class Rest:
     """A Class for all the rests"""
 
-    def __init__(self, rest=None, length=None) -> None:
+    def __init__(self, rest=None, length=None, measure=None) -> None:
 
         if length and isinstance(length, (int, float)):
             self._length = length
@@ -411,11 +418,11 @@ class Rest:
             self._length = rest.duration.quarterLength
 
         if rest is not None:
-            self.music21 = rest
+            self._music21 = rest
             self._measure = rest.measureNumber
         else:
-            self._measure = None
-            self.music21 = music21.note.Rest(quarterlength=length)
+            self._measure = measure
+            self._music21 = music21.note.Rest(quarterlength=length)
 
     @property
     def length(self):
@@ -435,18 +442,18 @@ class Rest:
 class Chord:
     """A Class to represent a chord (multiple notes at once)"""
 
-    def __init__(self, chord=None, notes: list = None) -> None:
+    def __init__(self, chord=None, notes: list = None, measure=None) -> None:
         if isinstance(chord, music21.chord.Chord):
-            self.music21 = chord
+            self._music21 = chord
             self._notes = [Note(note) for note in list(chord.notes)]
             self._measure = chord.measureNumber
             self._length = chord.duration.quarterLength
         # if chord is not a music21 chord object
         else:
-            notes = [note.music21 for note in notes]
-            self.music21 = music21.chord.Chord(notes)
+            notes = [note._music21 for note in notes]
+            self._music21 = music21.chord.Chord(notes)
             self._notes = [Note(note) for note in notes]
-            self._measure = None
+            self._measure = measure
             self._length = notes[0].duration.quarterLength
 
     @property

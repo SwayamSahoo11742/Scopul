@@ -144,14 +144,14 @@ def test_Note_object_creation():
     assert note.name == "C4"
     assert note.velocity == None
     assert note.measure == None
-    assert isinstance(note.music21, music21.note.Note) == True
+    assert isinstance(note._music21, music21.note.Note) == True
 
 def test_Rest_object_creation():
     rest = Rest(length=0.25)
 
     assert rest.length == 0.25
     assert rest.measure == None
-    assert isinstance(rest.music21, music21.note.Rest) == True
+    assert isinstance(rest._music21, music21.note.Rest) == True
 
 def test_Note_object_creation():
     N1 = Note(name="C4", length=1.5)
@@ -167,4 +167,13 @@ def test_Note_object_creation():
         assert isinstance(note, Note) == True
 
     assert chord.measure == None
-    assert isinstance(chord.music21, music21.chord.Chord) == True
+    assert isinstance(chord._music21, music21.chord.Chord) == True
+
+def test_add_note():
+    scop = Scopul("testfiles/test2.mid")
+    seq_lenght = len(scop.parts[0].sequence)
+
+    scop.add_note(Note(name="C4", length=0.5), scop.parts[0], measure_number=8, position=0)
+
+    assert len(scop.parts[0].sequence) == seq_lenght + 1
+    assert type(scop.parts[0].sequence[-1]) == Note
