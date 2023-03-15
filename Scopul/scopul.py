@@ -24,9 +24,9 @@ class Scopul:
     # Time Signature (time_sig)
     @property
     def time_sig_list(self) -> TimeSignature:
-        """Fetches every occurance of a time signature.
+        """Fetches every occurrence of a time signature.
 
-        Retrieves all the occurances of time signatures, with an optional ability to get unique signatures only.
+        Retrieves all the occurrences of time signatures, with an optional ability to get unique signatures only.
 
         Returns:
             A list or set object with time signatures in it.
@@ -127,7 +127,7 @@ class Scopul:
                 "Path to musescore not set. please set using config_musescore()"
             )
 
-        # checking for existance of the path
+        # checking for existence of the path
         if not pathlib.Path(os.environ["MUSESCORE_PATH"]).exists():
             raise FileNotFoundError(
                 f"MuseScore path at {os.environ['MUSESCORE_PATH']} not found. Please check to see if it exists"
@@ -196,7 +196,7 @@ class Scopul:
                 "Path to musescore not set. please set using config_musescore()"
             )
 
-        # Checking for existance of the path
+        # Checking for existence of the path
         if not pathlib.Path(os.environ["MUSESCORE_PATH"]):
             raise FileNotFoundError(
                 f"MuseScore path at {os.environ['MUSESCORE_PATH']} not found. Please check to see if it exists"
