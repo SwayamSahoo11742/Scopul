@@ -60,7 +60,7 @@ print(scop.tempo.ratio)
 - Export to other formats: Allow the export of the MIDI data to other formats such as CSV, JSON, or XML.🟠
 
 ## Links
-Documentaion - [https://swayamsahoo11742.github.io/](https://swayamsahoo11742.github.io/)
+Documentation - [https://swayamsahoo11742.github.io/](https://swayamsahoo11742.github.io/)
 
 Documentation Source Code - [https://github.com/SwayamSahoo11742/SwayamSahoo11742.github.io/](https://github.com/SwayamSahoo11742/SwayamSahoo11742.github.io/)
 
