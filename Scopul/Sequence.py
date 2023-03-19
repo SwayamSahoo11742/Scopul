@@ -245,7 +245,7 @@ class Part:
 
     # rhythm -> List of rhythm
     # gets a list of all the occurrences of a rhythm in the current part
-    def get_rhythm(self, rhythm: Iterable):
+    def search_rhythm(self, rhythm: Iterable):
         """gets a list of all the occurrences of a rhythm in the current part
 
         Args:
@@ -267,8 +267,6 @@ class Part:
                         c: Chord
                         n: Note
 
-            overlap: Boolean, will determine whether or not to retrieve overlapping cases
-
             Returns:
                 a list of lists, with each list containing the Scopul musical element objects that satisfy the rhythm:
                 For Example:
@@ -283,7 +281,7 @@ class Part:
         for note in rhythm:
             try:
                 if note[0] not in ["r", "c", "n"]:
-                    raise TypeError
+                    raise TypeError # Potential idea ("Incorrect note type found. Note types include: 'r' (Rests), 'n' (Notes) or 'c' (Chords)")
 
                 type_list.append(note[0])
 
@@ -307,7 +305,7 @@ class Part:
         # Filtering part by rhythm
 
         seq_element_list = [element for element in self.sequence]
-        seq_ql_list = [element._music21.quarterLength for element in self.sequence]
+        seq_ql_list = [element.music21.quarterLength for element in self.sequence]
 
         # Use the sublist function to find all occurrences of the given rhythm in the sequence
         rhythm_indices = sublist(seq_ql_list, rhythm_list, overlap=False)
@@ -339,10 +337,11 @@ class Part:
         return final_list
 
 
+# A container class, whose job is to store data nicely
 class Note:
     """A Class for all the notes"""
 
-    def __init__(self, note=None, name=None, length=None, velocity=None, measure=None) -> None:
+    def __init__(self, m21=None, name=None, length=None, velocity=None, measure=None) -> None:
         """
         A class representing a music note.
 
@@ -356,12 +355,12 @@ class Note:
             TypeError: If length is provided but is not a float or int.
         """
 
-        if note is not None:
-            self._music21 = note
-            self._measure = note.measureNumber
-            self._velocity = note.volume.velocity
+        if m21 is not None:
+            self.music21 = m21
+            self._measure = m21.measureNumber
+            self._velocity = m21.volume.velocity
         else:
-            self._music21 = music21.note.Note(name, quarterLength=length)
+            self.music21 = music21.note.Note(name, quarterLength=length)
             self._measure = velocity
             self._velocity = measure
 
@@ -369,11 +368,11 @@ class Note:
             raise ValueError(
                 "name expects a note name in 'note octave' format, ex: 'A1' 'C4'"
             )
-        self._name = name if name else self._music21.pitch.nameWithOctave
+        self._name = name if name else self.music21.pitch.nameWithOctave
 
         if length and not isinstance(length, (int, float)):
             raise TypeError("length only accepts ints and floats")
-        self._length = length if length else self._music21.duration.quarterLength
+        self._length = length if length else self.music21.duration.quarterLength
 
     @property
     def name(self):
@@ -406,23 +405,23 @@ class Note:
         """
         return self._length
 
-
+# A container class, whose job is to store data nicely
 class Rest:
     """A Class for all the rests"""
 
-    def __init__(self, rest=None, length=None, measure=None) -> None:
+    def __init__(self, m21=None, length=None, measure=None) -> None:
 
         if length and isinstance(length, (int, float)):
             self._length = length
         else:
-            self._length = rest.duration.quarterLength
+            self._length = m21.duration.quarterLength
 
-        if rest is not None:
-            self._music21 = rest
-            self._measure = rest.measureNumber
+        if m21 is not None:
+            self.music21 = m21
+            self._measure = m21.measureNumber
         else:
             self._measure = measure
-            self._music21 = music21.note.Rest(quarterlength=length)
+            self.music21 = music21.note.Rest(quarterlength=length)
 
     @property
     def length(self):
@@ -438,20 +437,20 @@ class Rest:
         """Returns an int, representing the measure number"""
         return self._measure
 
-
+# A container class, whose job is to store data nicely
 class Chord:
     """A Class to represent a chord (multiple notes at once)"""
 
-    def __init__(self, chord=None, notes: list = None, measure=None) -> None:
-        if isinstance(chord, music21.chord.Chord):
-            self._music21 = chord
-            self._notes = [Note(note) for note in list(chord.notes)]
-            self._measure = chord.measureNumber
-            self._length = chord.duration.quarterLength
+    def __init__(self, m21=None, notes: list = None, measure=None) -> None:
+        if isinstance(m21, music21.chord.Chord):
+            self.music21 = m21
+            self._notes = [Note(note) for note in list(m21.notes)]
+            self._measure = m21.measureNumber
+            self._length = m21.duration.quarterLength
         # if chord is not a music21 chord object
         else:
-            notes = [note._music21 for note in notes]
-            self._music21 = music21.chord.Chord(notes)
+            notes = [note.music21 for note in notes]
+            self.music21 = music21.chord.Chord(notes)
             self._notes = [Note(note) for note in notes]
             self._measure = measure
             self._length = notes[0].duration.quarterLength

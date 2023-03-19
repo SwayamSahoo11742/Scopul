@@ -26,17 +26,16 @@ class Scopul:
     def time_sig_list(self) -> TimeSignature:
         """Fetches every occurrence of a time signature.
 
-        Retrieves all the occurrences of time signatures, with an optional ability to get unique signatures only.
 
         Returns:
-            A list or set object with time signatures in it.
+            A list of TimeSignature objects
 
 
         """
         # List of signatures
         sig_list = []
 
-        for meta_message in self.midi.flat:
+        for meta_message in self.music21.flat:
             if isinstance(meta_message, meter.TimeSignature):
                 sig_list.append(
                     TimeSignature(
@@ -54,11 +53,6 @@ class Scopul:
         return self._audio
 
     @property
-    def midi(self):
-        """Retrieves midi file"""
-        return self._midi
-
-    @property
     def parts(self) -> list:
         """Retrieves a list of Part objects
 
@@ -73,10 +67,6 @@ class Scopul:
         """Allows to reconstruct the object to change accordingly to a new midi"""
         self.construct(audio)
 
-    def get_audio_length(self) -> int:
-        """Returns the audio length"""
-        return MidiFile(self._audio).length
-
     @property
     def tempo_list(self):
         """Fetches the tempo list in bpm format
@@ -84,14 +74,15 @@ class Scopul:
         Fetches the time signatures in bpm with both measure numbers and the tempo
 
         Returns:
-            A list of dict objects with 2 keys: "tempo" and "measure". For example:
-
-            [{"tempo":36, "measure": 1},{"tempo":5, "measure": 56}]
-
+            A list of Tempo objects
         """
-        return get_tempos(self._midi)
+        return get_tempos(self.music21)
 
     # ================================== METHODS=============================================
+    def get_audio_length(self) -> int:
+        """Returns the audio length"""
+        return MidiFile(self._audio).length
+    
     # Generate a pdf
     def generate_pdf(
         self,
@@ -138,7 +129,7 @@ class Scopul:
         if ext != ".pdf":
             raise InvalidFileFormatError(f"Expected .pdf, got {ext}")
 
-        midi = self.midi.makeMeasures()
+        midi = self.music21.makeMeasures()
 
         if remove_defects:
             for part in midi.parts:
@@ -207,7 +198,7 @@ class Scopul:
         if ext != ".xml":
             raise InvalidFileFormatError(f"Expected .xml, got {ext}")
 
-        midi = self.midi
+        midi = self.music21
 
         # Check for overwrite
         if overwrite:
@@ -229,7 +220,7 @@ class Scopul:
                     midi.remove(part)
 
         # Creates the pdf and deletes the musicxml file
-        self.midi.write("musicxml.xml", fp=fp)
+        self.music21.write("musicxml.xml", fp=fp)
         os.rename(fp + ".musicxml.musicxml", fp + output)
 
     # (Re)constructor
@@ -238,23 +229,39 @@ class Scopul:
 
         Can also be called with a setter to the midi property. For example:
 
-        testmidi.midi = "test.mid"
+        testmidi.music21 = "test.mid"
 
         """
 
         self._audio = audio
-        self._midi = converter.parse(audio).makeMeasures()
+        self.music21 = converter.parse(audio).makeMeasures()
         self._parts = []
-        for part in self.midi.parts:
+        for part in self.music21.parts:
             self._parts.append(Part(part))
 
     def save_midi(self, output, fp="", overwrite=False):
+        """
+        Save the MIDI file to the specified output file path.
+
+        Args:
+            self: A reference to the current object.
+            output (str): The name of the MIDI output file.
+            fp (str, optional): The path to the directory where the output file will be saved. Defaults to the current directory.
+            overwrite (bool, optional): Whether to overwrite the output file if it already exists. Defaults to False.
+
+        Raises:
+            InvalidFileFormatError: If the output file has an invalid file extension.
+            FileExistsError: If the output file already exists and overwrite is set to False.
+
+        Returns:
+            None
+        """
         # Check for correct file format
         ext = pathlib.Path(output).suffix
         if ext != ".mid":
             raise InvalidFileFormatError(f"Expected .mid, got {ext}")
 
-        midi = self.midi
+        midi = self.music21
 
         # Check for overwrite
         if overwrite:
@@ -336,9 +343,9 @@ class Scopul:
                 new_part.append(element)
 
         new_part = new_part.makeMeasures()
-        self.midi.replace(part, new_part)
+        self.music21.replace(part, new_part)
 
-    def add_TimeSignature(self, time_sig: str, part, measure: int = 1) -> None:
+    def add_TimeSignature(self, time_sig: str, part, measure_number: int = 1) -> None:
         """A method to add a timesignature to a piece
 
         Args:
@@ -351,13 +358,13 @@ class Scopul:
 
         """
         # Getting the Music21 converter object and the Muic21 part object
-        midi_file = self.midi
+        midi_file = self.music21
         part = part._part
 
         # Looking for measure
-        if part[-1].measureNumber < measure:
+        if part[-1].measureNumber < measure_number:
             raise MeasureNotFoundException(
-                f"Measure {measure} was not found in this part"
+                f"Measure {measure_number} was not found in this part"
             )
 
         new_part = stream.Stream()
@@ -366,7 +373,7 @@ class Scopul:
         time_added = False
         for element in part.flat:
 
-            if element.measureNumber == measure and not time_added:
+            if element.measureNumber == measure_number and not time_added:
                 new_part.append(meter.TimeSignature(time_sig))
                 time_added = True
 
@@ -417,13 +424,13 @@ class Scopul:
         for measure in part._part.getElementsByClass("Measure"):
 
             if measure.number == measure_number and not element_added:
-                measure.insert(position, element._music21)
+                measure.insert(position, element.music21)
                 element_added = True
 
             new_part.append(measure)
 
         new_part = new_part.makeMeasures()
-        self.midi.replace(part, new_part)
+        self.music21.replace(part, new_part)
 
         
         

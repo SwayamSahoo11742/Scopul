@@ -25,11 +25,11 @@ scop = Scopul("test.mid")
 
 
 # Get tempo
-print(scop.tempo.ratio)
+print(scop.get_audio_lenght())
 
 
 # Sample output
->>> "3/4"
+>>> "12.467519999999997"
 
 ```
 ## Future Plans
@@ -39,24 +39,15 @@ print(scop.tempo.ratio)
 
 🟢 = Done
 
-### Things to look forward in the next release, any suggestions will be appreciated
-- Time signature conversions 🟢
-- Tempo conversions 🟢
-- Extract a specific rhythm 🟢
-- Ability to save as MIDI 🟢
-- Altering MIDI (adding/Deleting measures or notes)🟢
-- Refactoring and adding documentation for the changes 🟡
-- CONTRIBUTING.md will be updated with actual useful info 🟡
-
-### Things for the distant future, any suggestions will be appreciated
+### Things to look forward in the next major release, any suggestions will be appreciated
 - Chord extraction: Allow the extraction of chord progressions from the MIDI file.🟠
 - Key detection: Implement a function to detect the key of the MIDI file.🟠
 - Melody extraction: Allow the extraction of the melody from the MIDI file.🟠
 - Harmonic analysis: Provide harmonic analysis of the MIDI file by identifying chords and their progressions.🟠
+
+### Things for the distant future, any suggestions will be appreciated
 - Drum track extraction: Allow the extraction of the drum track from the MIDI file.🟠
-- Time signature detection: Implement a function to detect the time signature of the MIDI file.🟠
 - Quantization: Implement a function to quantize the notes in the MIDI file to a particular grid size.🟠
-- Instrument recognition: Provide functionality to recognize the instruments used in the MIDI file.
 - MIDI file validation: Implement a function to validate the structure of the MIDI file and detect any errors.🟠
 - Export to other formats: Allow the export of the MIDI data to other formats such as CSV, JSON, or XML.🟠
 

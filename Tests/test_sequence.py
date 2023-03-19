@@ -109,7 +109,7 @@ def test_get_rests_invalid_element_error():
 def test_get_rhythm():
     # Test case 1 - simple rhythm with overlap=False
     part = Scopul("testfiles/test1.mid").parts[0]
-    result = part.get_rhythm([0.75, 0.25, 0.5, 0.75, 0.25, 0.5])
+    result = part.search_rhythm([0.75, 0.25, 0.5, 0.75, 0.25, 0.5])
 
     new_result = []
     for sequence in result:
@@ -126,7 +126,7 @@ def test_get_rhythm():
 
     # Test case 2 - complex rhythm with overlap=False
     part = Scopul("testfiles/test1.mid").parts[0]
-    result = part.get_rhythm([["c", 0.75], ["r", 0.25], ["c", 0.75], ["r", 0.25]])
+    result = part.search_rhythm([["c", 0.75], ["r", 0.25], ["c", 0.75], ["r", 0.25]])
 
     new_result = []
     for sequence in result:
@@ -144,14 +144,14 @@ def test_Note_object_creation():
     assert note.name == "C4"
     assert note.velocity == None
     assert note.measure == None
-    assert isinstance(note._music21, music21.note.Note) == True
+    assert isinstance(note.music21, music21.note.Note) == True
 
 def test_Rest_object_creation():
     rest = Rest(length=0.25)
 
     assert rest.length == 0.25
     assert rest.measure == None
-    assert isinstance(rest._music21, music21.note.Rest) == True
+    assert isinstance(rest.music21, music21.note.Rest) == True
 
 def test_Note_object_creation():
     N1 = Note(name="C4", length=1.5)
@@ -167,7 +167,7 @@ def test_Note_object_creation():
         assert isinstance(note, Note) == True
 
     assert chord.measure == None
-    assert isinstance(chord._music21, music21.chord.Chord) == True
+    assert isinstance(chord.music21, music21.chord.Chord) == True
 
 def test_add_note():
     scop = Scopul("testfiles/test2.mid")
