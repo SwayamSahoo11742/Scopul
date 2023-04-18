@@ -40,6 +40,8 @@ print(scop.get_audio_lenght())
 🟢 = Done
 
 ### Things to look forward in the next major release, any suggestions will be appreciated
+- Deletion of elements (Only addition is currently supported)
+- Create and add parts, consisting of multiple other Scopul Musical Elements
 - Chord extraction: Allow the extraction of chord progressions from the MIDI file.🟠
 - Key detection: Implement a function to detect the key of the MIDI file.🟠
 - Melody extraction: Allow the extraction of the melody from the MIDI file.🟠
@@ -50,6 +52,10 @@ print(scop.get_audio_lenght())
 - Quantization: Implement a function to quantize the notes in the MIDI file to a particular grid size.🟠
 - MIDI file validation: Implement a function to validate the structure of the MIDI file and detect any errors.🟠
 - Export to other formats: Allow the export of the MIDI data to other formats such as CSV, JSON, or XML.🟠
+
+## Bugs
+- A lot of the MIDI to PDF conversions are still throwing errors
+- PDFs and XMLs are not generating with title
 
 ## Links
 Documentation - [https://swayamsahoo11742.github.io/](https://swayamsahoo11742.github.io/)
