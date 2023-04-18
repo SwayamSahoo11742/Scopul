@@ -40,8 +40,8 @@ print(scop.get_audio_lenght())
 🟢 = Done
 
 ### Things to look forward in the next major release, any suggestions will be appreciated
-- Deletion of elements (Only addition is currently supported)
-- Create and add parts, consisting of multiple other Scopul Musical Elements
+- Deletion of elements (Only addition is currently supported)🟠
+- Create and add parts, consisting of multiple other Scopul Musical Elements🟠
 - Chord extraction: Allow the extraction of chord progressions from the MIDI file.🟠
 - Key detection: Implement a function to detect the key of the MIDI file.🟠
 - Melody extraction: Allow the extraction of the melody from the MIDI file.🟠
