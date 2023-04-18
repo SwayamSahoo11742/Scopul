@@ -70,6 +70,6 @@ GitHub - [https://github.com/SwayamSahoo11742/Scopul/](https://github.com/Swayam
 Thanks to [Music21](https://web.mit.edu/music21/doc/) and [MuseScore](https://musescore.org/en/download) for making this possible
 
 ## Contact or Help us!
-If you encounter any bugs, kindly send me an email at swayamsa01@gmail.com. If you have any suggestions or would like to contribute to the improvement of the code, including efficiency and best practices, feel free to reach out to me via email or create a pull request. I most likely won’t be actively adding and developing this project, but I will still implement any sugegstions that are fit.
+If you have any questions, kindly send an email to swayamsa01@gmail.com. If you have any suggestions or would like to contribute to the improvement of the code, including efficiency and best practices, feel free to reach out to me via email or create a pull request. I most likely won’t be actively adding and developing this project, but I will still implement any sugegstions that are fit.
 
 Thank you very much!
