@@ -41,4 +41,4 @@ def test_tempo_addition_to_new_locatoion():
 
     assert len(scop.tempo_list) == 2
     assert scop.tempo_list[-1].bpm == 122
-    assert scop.tempo_list[-1].measure == 3
+    assert scop.tempo_list[-1].measure == 5

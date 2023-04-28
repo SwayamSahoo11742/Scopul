@@ -1,9 +1,13 @@
 import music21
-from Scopul.scopul_exception import InvalidMusicElementError
+from Scopul.MusicalElements import Note, Rest, Chord
+from Scopul.ChordProgression import ChordProgression
+from Scopul.scopul_exception import InvalidMusicElementError, PercussionChordifyError
 from Scopul.conversions import note_to_number
 from collections.abc import Iterable
 from Scopul.helpers import sublist
+from Scopul import TimeSignature, Tempo
 import re
+from copy import deepcopy
 
 
 class Part:
@@ -11,29 +15,74 @@ class Part:
     EX: A flute part
     """
 
-    def __init__(self, part) -> None:
-        self._part = part
+    def __init__(self, part: Iterable | music21.stream.Part) -> None:
+        if not isinstance(part, music21.stream.Part):
+            part = music21.stream.Part()
+            for ele in part:
+                if isinstance(ele, Note):
+                    part.append(music21.note.Note(ele.name, velocity=ele.velocity, duration=music21.duration.Duration(ele.length)))
+                if isinstance(ele, Rest):
+                    part.append(music21.note.Rest(ele.length))
+                if isinstance(ele, Chord):
+                    c = music21.chord.Chord()
+                    for nt in ele.notes:
+                        c.add(music21.note.Note(nt.name, velocity=nt.velocity, duration=music21.duration.Duration(nt.length)))
+                    part.append(c)
+           
+        self._part = part 
         self.name = part.partName
 
     @property
     def sequence(self):
         sequence = []
         # Looping through the part
-        for element in self._part.recurse():
-            # Setting the class and appending depending on the type of symbol
-            if isinstance(element, music21.note.Note):
-                sequence.append(Note(element))
-            elif isinstance(element, music21.chord.Chord):
-                sequence.append(Chord(element))
-            elif isinstance(element, music21.note.Rest):
-                sequence.append(Rest(element))
-        
+        if isinstance(self._part, music21.stream.Part):
+            for element in self._part.recurse():
+                # Setting the class and appending depending on the type of symbol
+                if isinstance(element, music21.note.Note):
+                    sequence.append(Note(element))
+                elif isinstance(element, music21.chord.Chord):
+                    sequence.append(Chord(element))
+                elif isinstance(element, music21.note.Rest):
+                    sequence.append(Rest(element))
         return sequence
 
 
+    # =========================================================================================== METHODS ====================================================================================================================
+    def get_chord_progression(self):
+        try:
+            return ChordProgression(self)
+        except AttributeError:
+            raise PercussionChordifyError("Cannot get chord progression for Percussion part")
+        
+    def delete(self, index: int = 0):
+        self._part.pop(index)
+        
+    def insert(self, element, measure_number: int = None, position: int = 0):
+        if not isinstance(element, (Note, Rest, Chord, TimeSignature, Tempo)):
+            raise ValueError(f"{type(element)} is not a Scopul musical element (Notes, Rests, Chords, Tempo, TimeSignature)")
+        
+        if not measure_number:
+            # If no measure number is provided, add the element to the last measure in the part
+            measure_number = self.sequence[-1].measure
+
+        new_part = music21.stream.Stream()
+
+        # copying into new part with modified time
+        element_added = False
+        for measure in self._part.getElementsByClass("Measure"):
+
+            if measure.number == measure_number and not element_added:
+                measure.insert(position, deepcopy(element.music21))
+                element_added = True
+
+            new_part.append(measure)
+
+        new_part = new_part.makeMeasures()
+        self._part.replace(self._part, new_part)
 
     # Note list
-    def get_notes(self, seq: list) -> list:
+    def get_notes(self) -> list:
         """Retrieves all the notes in a given sequence
 
         Args:
@@ -45,6 +94,7 @@ class Part:
         Raises:
             InvalidMusicElementError: if found a type that is not Rest, Note or Chord
         """
+        seq = self.sequence
         # Notes list
         notes = []
 
@@ -68,12 +118,12 @@ class Part:
         return notes
 
     # Gets a count of notes
-    def get_note_count(self, seq: list) -> int:
+    def get_note_count(self) -> int:
         """Retrieves the number of notes"""
-        return len(self.get_notes(seq))
+        return len(self.get_notes())
 
     # Note list
-    def get_rests(self, seq: list) -> list:
+    def get_rests(self) -> list:
         """Retrieves all the notes in a given sequence
 
         Args:
@@ -85,6 +135,7 @@ class Part:
         Raises:
             InvalidMusicElementError: if found a type that is not Rest, Note or Chord
         """
+        seq = self.sequence
         # rests list
         rests = []
 
@@ -108,13 +159,13 @@ class Part:
         return rests
 
     # Gets a count of rests
-    def get_rest_count(self, seq: list) -> int:
+    def get_rest_count(self) -> int:
         """Retrieves the number of rests"""
-        return len(self.get_rests(seq))
+        return len(self.get_rests())
 
         # Note list
 
-    def get_chords(self, seq: list) -> list:
+    def get_chords(self) -> list:
         """Retrieves all the chords in a given sequence
 
         Args:
@@ -126,6 +177,7 @@ class Part:
         Raises:
             InvalidMusicElementError: if found a type that is not Rest, Note or Chord
         """
+        seq = self.sequence
         # chords list
         chords = []
 
@@ -149,9 +201,9 @@ class Part:
         return chords
 
     # Gets a count of notes
-    def get_chord_count(self, seq: list) -> int:
+    def get_chord_count(self) -> int:
         """Retrieves the number of notes"""
-        return len(self.get_chords(seq))
+        return len(self.get_chords())
 
     def get_measure(self, measures: int | list):
         """Fetches the contents of a measure.
@@ -205,7 +257,7 @@ class Part:
                 f"get_measure only accepts int or iterable, instead got {type(measures)}"
             )
 
-    def get_highest_note(self, seq: list):
+    def get_highest_note(self):
         """Retrieves all the chords in a given sequence
 
         Args:
@@ -217,6 +269,7 @@ class Part:
         Raises:
             InvalidMusicElementError: if found a type that is not Rest, Note or Chord
         """
+        seq = self.sequence
         # highest note
         highest = 0
 
@@ -337,145 +390,3 @@ class Part:
         return final_list
 
 
-# A container class, whose job is to store data nicely
-class Note:
-    """A Class for all the notes"""
-
-    def __init__(self, m21=None, name=None, length=None, velocity=None, measure=None) -> None:
-        """
-        A class representing a music note.
-
-        Args:
-            note: A music21 note object (optional).
-            name: A string representing the name of the note in 'note octave' format (optional).
-            length: A float or int representing the length of the note (optional).
-
-        Raises:
-            ValueError: If name is provided but is not in 'note octave' format.
-            TypeError: If length is provided but is not a float or int.
-        """
-
-        if m21 is not None:
-            self.music21 = m21
-            self._measure = m21.measureNumber
-            self._velocity = m21.volume.velocity
-        else:
-            self.music21 = music21.note.Note(name, quarterLength=length)
-            self._measure = velocity
-            self._velocity = measure
-
-        if name and not re.search(r"[a-zA-z][1-9]", name):
-            raise ValueError(
-                "name expects a note name in 'note octave' format, ex: 'A1' 'C4'"
-            )
-        self._name = name if name else self.music21.pitch.nameWithOctave
-
-        if length and not isinstance(length, (int, float)):
-            raise TypeError("length only accepts ints and floats")
-        self._length = length if length else self.music21.duration.quarterLength
-
-    @property
-    def name(self):
-        """Returns the note in 'letter-name octave' format.
-
-        Example:
-            C4
-            D5
-            B-4
-        """
-        return self._name
-
-    @property
-    def measure(self):
-        """Returns an int representing the measure"""
-        return self._measure
-
-    @property
-    def velocity(self):
-        """Returns an int representing velocity of the note"""
-        return self._velocity
-
-    @property
-    def length(self):
-        """Returns a str representing the length of the note
-
-        Example:
-            "quarter"
-
-        """
-        return self._length
-
-# A container class, whose job is to store data nicely
-class Rest:
-    """A Class for all the rests"""
-
-    def __init__(self, m21=None, length=None, measure=None) -> None:
-
-        if length and isinstance(length, (int, float)):
-            self._length = length
-        else:
-            self._length = m21.duration.quarterLength
-
-        if m21 is not None:
-            self.music21 = m21
-            self._measure = m21.measureNumber
-        else:
-            self._measure = measure
-            self.music21 = music21.note.Rest(quarterlength=length)
-
-    @property
-    def length(self):
-        """Returns a str, indicating the length of the rest
-
-        Example:
-            "whole"
-        """
-        return self._length
-
-    @property
-    def measure(self):
-        """Returns an int, representing the measure number"""
-        return self._measure
-
-# A container class, whose job is to store data nicely
-class Chord:
-    """A Class to represent a chord (multiple notes at once)"""
-
-    def __init__(self, m21=None, notes: list = None, measure=None) -> None:
-        if isinstance(m21, music21.chord.Chord):
-            self.music21 = m21
-            self._notes = [Note(note) for note in list(m21.notes)]
-            self._measure = m21.measureNumber
-            self._length = m21.duration.quarterLength
-        # if chord is not a music21 chord object
-        else:
-            notes = [note.music21 for note in notes]
-            self.music21 = music21.chord.Chord(notes)
-            self._notes = [Note(note) for note in notes]
-            self._measure = measure
-            self._length = notes[0].duration.quarterLength
-
-    @property
-    def length(self):
-        """Returns a str, representing the length of the chord
-
-        Example:
-            "eighth"
-        """
-        return self._length
-
-    @property
-    def measure(self):
-        """Returns an int, representing the measure number"""
-        return self._measure
-
-    @property
-    def notes(self):
-        """Retrieves a list of notes in a chord
-
-        Returns;
-            A list, consisting of Note objects. For example:
-
-            [Note Object, Note Object]
-        """
-        return self._notes

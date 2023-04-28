@@ -16,3 +16,7 @@ class NoMusePathError(Exception):
 class MeasureNotFoundException(Exception):
     def __init__(self, value) -> None:
         self.value = value
+
+class PercussionChordifyError(Exception):
+    def __init__(self, value) -> None:
+        self.value = value
