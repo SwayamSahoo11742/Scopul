@@ -20,24 +20,30 @@ class ChordProgression:
         return len(self.roman_chords)
     
     def transpose(self, key: str):
-        self.music21.transpose(key)
-        self.update()
+        """Changes the chords to the specified interval/key
+            - Args:
+                - interval: an int or a str, depending on your needs
+            - Returns:
+                - None
+        """
+        self.music21 = self.music21.transpose(key)
+        self._update()
     
     def append(self, chord: Chord):
         if not isinstance(chord, Chord):
             return InvalidMusicElementError(f"type {type(chord)} is not a Scopul musical element")
         self.music21.append(chord.music21)
-        self.update()
+        self._update()
 
     def insert(self, index: int, chord: Chord):
         self.music21.insert(index, chord.music21)
-        self.update()
+        self._update()
 
     def delete(self, index:int):
         self.music21.remove(index)
-        self.update()
+        self._update()
     
-    def update(self):
+    def _update(self):
         self.roman_chords = []
         self.key = None
 

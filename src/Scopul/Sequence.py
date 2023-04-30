@@ -13,24 +13,30 @@ from copy import deepcopy
 class Part:
     """A class representing the a part in a score.
     EX: A flute part
+
+     Args
+        part: Can be an iterbale consisting of Scopul musical elements OR a music21 part object
     """
 
     def __init__(self, part: Iterable | music21.stream.Part) -> None:
         if not isinstance(part, music21.stream.Part):
-            part = music21.stream.Part()
+            p = music21.stream.Part()
             for ele in part:
                 if isinstance(ele, Note):
-                    part.append(music21.note.Note(ele.name, velocity=ele.velocity, duration=music21.duration.Duration(ele.length)))
+                    p.append(music21.note.Note(ele.name, velocity=ele.velocity, duration=music21.duration.Duration(ele.length)))
                 if isinstance(ele, Rest):
-                    part.append(music21.note.Rest(ele.length))
+                    p.append(music21.note.Rest(ele.length))
                 if isinstance(ele, Chord):
                     c = music21.chord.Chord()
                     for nt in ele.notes:
                         c.add(music21.note.Note(nt.name, velocity=nt.velocity, duration=music21.duration.Duration(nt.length)))
-                    part.append(c)
-           
-        self._part = part 
-        self.name = part.partName
+                    p.append(c)
+
+            self._part = p 
+            self.name = p.partName
+        else:
+            self._part= part
+            self.name = part.partName
 
     @property
     def sequence(self):
@@ -56,9 +62,23 @@ class Part:
             raise PercussionChordifyError("Cannot get chord progression for Percussion part")
         
     def delete(self, index: int = 0):
+        """Deletes a object at the index of self.sequence
+            Args:
+                index: an in
+        """
         self._part.pop(index)
         
     def insert(self, element, measure_number: int = None, position: int = 0):
+        """Inserts a musical element into the current part at a certain location
+
+            Args:
+                element: a Note, Rest or Chord object
+                measure_number: an int
+                position: an int, the offset of the note within the measure
+            Returns:
+                None
+            
+        """
         if not isinstance(element, (Note, Rest, Chord, TimeSignature, Tempo)):
             raise ValueError(f"{type(element)} is not a Scopul musical element (Notes, Rests, Chords, Tempo, TimeSignature)")
         

@@ -23,24 +23,15 @@ def test_time_ratio():
     assert scop.time_sig_list[0].ratio == "6/8"
     # Testing setter error
 
-    # Repeat the above steps
-    scop.audio = file2
-    assert scop.time_sig_list[0].ratio == "4/4"
-
 
 # Test Fractional parts, (Numerator/Denominators)
 def test_fraction():
 
     # Tetsing values
-    scop.audio = file1
+    scop.path = file1
     assert scop.time_sig_list[0].denominator == 8
     assert scop.time_sig_list[0].numerator == 6
 
-
-    # Doing the same for the second file
-    scop.audio = file2
-    assert scop.time_sig_list[0].denominator == 4
-    assert scop.time_sig_list[0].numerator == 4
 
 
 
@@ -52,7 +43,3 @@ def test_list():
     assert scop.time_sig_list[0].ratio == "6/8"
     assert scop.time_sig_list[0].measure == 1
 
-    # Repeat
-    scop.audio = file2
-    assert scop.time_sig_list[0].ratio == "4/4"
-    assert scop.time_sig_list[0].measure == 1

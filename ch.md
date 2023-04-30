@@ -8,6 +8,7 @@
 - Part.ChordProgression
 - Note, Rest and Chord moved to MusicalElements.py
 - Part.delete(index)
+- Scopul.append_part()
 
 
 ### Chord Progressions!

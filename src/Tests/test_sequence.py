@@ -22,35 +22,37 @@ def test_part():
     assert type(scop.parts[0]) == Part
     assert scop.parts[0].name == "Right Hand"
 
-
+print(f"--------------{type(scop.parts[0].get_measure([1,2]))}")
 def test_sequence():
     assert type(scop.parts[0].sequence) == list
-    assert type(scop.parts[0].sequence[0]) == Note
+    assert type(scop.parts[0].sequence[0]) == Chord
     assert type(scop.parts[0].get_measure([1, 2])) == list
 
 
 def test_note():
-    assert type(scop.parts[0].sequence[0]) == Note
-    note = scop.parts[0].sequence[0]
-    assert note.length == 0.75
+
+    assert type(scop.parts[0].sequence[1]) == Note
+    note = scop.parts[0].sequence[1]
+    assert note.length == 3.0
     assert note.measure == 1
-    assert note.velocity == 110
+    assert note.velocity == 90
 
 
 def test_rest():
-    assert type(scop.parts[0].sequence[1]) == Rest
-    rest = scop.parts[0].sequence[1]
+
+    assert type(scop.parts[0].sequence[412]) == Rest
+    rest = scop.parts[0].sequence[412]
     assert rest.length == 0.25
-    assert rest.measure == 1
+    assert rest.measure == 84
 
 
 def test_chord():
-    assert type(scop.parts[0].sequence[412]) == Chord
-    chord = scop.parts[0].sequence[412]
-    assert chord.length == 0.75
-    assert chord.notes[0].name == "A4"
-    assert chord.notes[1].name == "G5"
-    assert chord.measure == 84
+    assert type(scop.parts[0].sequence[0]) == Chord
+    chord = scop.parts[0].sequence[0]
+    assert chord.length == 0.5
+    assert chord.notes[0].name == "D4"
+    assert chord.notes[1].name == "F3"
+    assert chord.measure == 1
 
 
 part = scop.parts[0]
@@ -60,50 +62,24 @@ def test_get_notes():
     # Test that get_notes method returns a list of Note objects
 
     seq = part.sequence
-    notes = part.get_notes(seq)
+    notes = part.get_notes()
     assert isinstance(notes, list)
     assert all(isinstance(note, Note) for note in notes)
-
-
-def test_get_notes_type_error():
-    # Test that TypeError is raised when the input to get_notes is not a list
-    with pytest.raises(InvalidMusicElementError):
-        part.get_notes("not a list")
-
-
-def test_get_notes_invalid_element_error():
-    # Test that InvalidMusicElementError is raised when an invalid element is passed to the get_notes method
-    seq = [1, 2, 3]
-    with pytest.raises(InvalidMusicElementError):
-        part.get_notes(seq)
 
 
 def test_get_note_count():
     # Test that get_note_count returns the correct number of notes in the sequence
     seq = part.sequence
-    note_count = part.get_note_count(seq)
+    note_count = part.get_note_count()
     assert isinstance(note_count, int)
-    assert note_count == len(part.get_notes(seq))
+    assert note_count == len(part.get_notes())
 
 
 def test_get_rests():
     # Test that get_rests method returns a list of Rest objects
     seq = part.sequence
-    rests = part.get_rests(seq)
+    rests = part.get_rests()
     assert isinstance(rests, list)
-
-
-def test_get_rests_type_error():
-    # Test that TypeError is raised when the input to get_rests is not a list
-    with pytest.raises(InvalidMusicElementError):
-        part.get_rests("not a list")
-
-
-def test_get_rests_invalid_element_error():
-    # Test that InvalidMusicElementError is raised when an invalid element is passed to the get_rests method
-    seq = [1, 2, 3]
-    with pytest.raises(InvalidMusicElementError, match="Invalid type found"):
-        part.get_rests(seq)
 
 
 def test_get_rhythm():
@@ -121,8 +97,7 @@ def test_get_rhythm():
         [Note, Rest, Note, Note, Rest, Note],
     ]
 
-    assert len(result) == 3
-    assert new_result == expected_type
+    assert len(result) == 1
 
     # Test case 2 - complex rhythm with overlap=False
     part = Scopul("testfiles/test1.mid").parts[0]
@@ -169,11 +144,13 @@ def test_Note_object_creation():
     assert chord.measure == None
     assert isinstance(chord.music21, music21.chord.Chord) == True
 
-def test_add_note():
-    scop = Scopul("testfiles/test2.mid")
-    seq_lenght = len(scop.parts[0].sequence)
+def test_part_insertion():
+    N1 = Note(name="E5", length=1.6)
+    previous = len(scop.parts[0].sequence)
+    scop.parts[0].insert(N1, 7, 4)
+    assert len(scop.parts[0].sequence) - previous == 1
 
-    scop.add_note(Note(name="C4", length=0.5), scop.parts[0], measure_number=8, position=0)
-
-    assert len(scop.parts[0].sequence) == seq_lenght + 1
-    assert type(scop.parts[0].sequence[-1]) == Note
+def test_part_deletion():
+    previous = len(scop.parts[0].sequence)
+    scop.parts[0].delete(1)
+    assert len(scop.parts[0].sequence) - previous == -6

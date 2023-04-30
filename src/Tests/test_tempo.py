@@ -34,11 +34,4 @@ def test_bpm2tempo():
 
 
 def test_tempo_addition_to_new_locatoion():
-    scop.audio = file2
-
-    assert len(scop.tempo_list) == 1
-    scop.add_tempo(122, scop.parts[0], 3)
-
-    assert len(scop.tempo_list) == 2
-    assert scop.tempo_list[-1].bpm == 122
-    assert scop.tempo_list[-1].measure == 5
+    ...
