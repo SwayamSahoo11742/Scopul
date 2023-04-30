@@ -31,7 +31,3 @@ def test_tempo2bpm():
 
 def test_bpm2tempo():
     assert bpm2midi_tempo(69) == 869565
-
-
-def test_tempo_addition_to_new_locatoion():
-    ...
