@@ -52,7 +52,8 @@ print(scop.get_audio_lenght())
 - Quantization: Implement a function to quantize the notes in the MIDI file to a particular grid size.🟠
 - MIDI file validation: Implement a function to validate the structure of the MIDI file and detect any errors.🟠
 - Export to other formats: Allow the export of the MIDI data to other formats such as CSV, JSON, or XML.🟠
-
+- 
+None of this is happening anytime soon. 
 ## Bugs
 - A lot of the MIDI to PDF conversions are still throwing errors
 - PDFs and XMLs are not generating with title
